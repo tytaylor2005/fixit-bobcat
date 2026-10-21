@@ -39,12 +39,12 @@ const FALLBACK: Analysis = {
 const buildPrompt = (building: string) => `You are FixIt Bobcat, a campus sustainability assistant for Georgia College & State University.
 Look at the photo. It was taken in or near: ${building}.
 Identify the waste or maintenance problem and respond with ONLY a JSON object, no prose, no markdown:
-{"category":"WATER|ENERGY|WASTE|DAMAGE|OTHER",
+{"category":"exactly one of: WATER, ENERGY, WASTE, DAMAGE, OTHER",
  "title":"max 8 words",
  "description":"1-2 sentences, plain language, written as a facilities report",
  "impact":"a concrete estimate with a unit, e.g. '~1,500 gallons/week' or '~3 kWh/day'. If unsure, give a rough range.",
  "impactScore":1-10 integer (10 = worst),
- "severity":"LOW|MEDIUM|HIGH",
+ "severity":"exactly one of: LOW, MEDIUM, HIGH",
  "action":"one sentence telling facilities what to do"}
 If the photo shows nothing wrong, use category OTHER, severity LOW, impactScore 1, and say so kindly.`;
 
@@ -59,19 +59,40 @@ const imageFormatFor = (key: string): ImageFormat => {
 const str = (v: unknown, fallback: string) =>
   typeof v === 'string' && v.trim() ? v.trim() : fallback;
 
+/** Guess a category from the report text when the model's category is unusable. */
+const inferCategory = (text: string): string => {
+  const t = text.toLowerCase();
+  if (/faucet|water|leak|drip|fountain|flood|sink|toilet|hose|sprinkler/.test(t)) return 'WATER';
+  if (/light|lamp|energy|electric|a\/c|air condition|hvac|heater|thermostat|door propped|open door|monitor|screen/.test(t)) return 'ENERGY';
+  if (/trash|bin|recycl|litter|garbage|waste|compost|overflow/.test(t)) return 'WASTE';
+  if (/broken|damage|crack|shatter|vandal/.test(t)) return 'DAMAGE';
+  return 'OTHER';
+};
+
+const pickEnum = (value: unknown, allowed: readonly string[]): string | null => {
+  const v = String(value ?? '').toUpperCase().trim();
+  if (allowed.includes(v)) return v;
+  // Model echoed several options ("WATER|ENERGY" / "LOW, MEDIUM"): treat as invalid.
+  return null;
+};
+
 /** Coerce whatever the model returned into a valid AnalysisResult. */
 const normalize = (raw: Record<string, unknown>): Analysis => {
-  const category = String(raw.category ?? '').toUpperCase();
-  const severity = String(raw.severity ?? '').toUpperCase();
+  const title = str(raw.title, FALLBACK.title);
+  const description = str(raw.description, FALLBACK.description);
+  const action = str(raw.action, FALLBACK.action);
+  const category =
+    pickEnum(raw.category, CATEGORIES) ?? inferCategory(`${title} ${description} ${action}`);
+  const severity = pickEnum(raw.severity, SEVERITIES) ?? 'MEDIUM';
   const score = Math.round(Number(raw.impactScore));
   return {
-    category: (CATEGORIES as readonly string[]).includes(category) ? category : 'OTHER',
-    title: str(raw.title, FALLBACK.title),
-    description: str(raw.description, FALLBACK.description),
+    category,
+    title,
+    description,
     impact: str(raw.impact, FALLBACK.impact),
     impactScore: Number.isFinite(score) ? Math.min(10, Math.max(1, score)) : FALLBACK.impactScore,
-    severity: (SEVERITIES as readonly string[]).includes(severity) ? severity : 'MEDIUM',
-    action: str(raw.action, FALLBACK.action),
+    severity,
+    action,
   };
 };
 

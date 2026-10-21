@@ -42,7 +42,7 @@ npm run dev -- --host   # to open it from a phone on the same Wi-Fi
 
 ## Things we learned (don't rediscover these)
 
-- `us.anthropic.claude-sonnet-4-20250514-v1:0` from the spec is **end-of-life** on Bedrock. The Lambda defaults to `us.anthropic.claude-sonnet-4-5-20250929-v1:0`, which works. Fallback: `us.amazon.nova-lite-v1:0` (also verified working). Change `MODEL_ID` in `amplify/functions/analyze/resource.ts`.
+- `us.anthropic.claude-sonnet-4-20250514-v1:0` from the spec is **end-of-life** on Bedrock. Sonnet 4.5 (`us.anthropic.claude-sonnet-4-5-20250929-v1:0`) exists but every call fails with *"Model use case details have not been submitted for this account"* until someone fills out the Anthropic use-case form in the Bedrock console (Model access → Anthropic). So the Lambda defaults to **`us.amazon.nova-lite-v1:0`**, which handles photos fine. To switch back after the form is approved, change `MODEL_ID` in `amplify/functions/analyze/resource.ts`; the running sandbox redeploys automatically.
 - Amplify Storage `allow.guest` **requires** an auth resource (Cognito identity pool) or the sandbox refuses to deploy. `amplify/auth/resource.ts` exists only for that. There is no login UI anywhere.
 - The Vite 8 template omits `"strict": true`; Amplify's data client types break without it. Already fixed in `tsconfig.app.json`.
 - CDK had to be bootstrapped in us-east-2 once (`npx aws-cdk bootstrap aws://509425091556/us-east-2`). Done.
