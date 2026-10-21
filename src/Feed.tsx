@@ -46,6 +46,7 @@ export function toItem(r: {
   status?: string | null;
   estimatedCost?: number | null;
   actualCost?: number | null;
+  flags?: string | null;
   createdAt: string;
   updatedAt?: string | null;
 }): ReportItem {
@@ -60,9 +61,10 @@ export function toItem(r: {
     impactScore: r.impactScore ?? 0,
     severity: (r.severity ?? 'MEDIUM') as Severity,
     action: r.action ?? '',
-    status: r.status === 'FIXED' ? 'FIXED' : 'OPEN',
+    status: r.status === 'FIXED' ? 'FIXED' : r.status === 'PENDING_REVIEW' ? 'PENDING' : 'OPEN',
     estimatedCost: r.estimatedCost ?? null,
     actualCost: r.actualCost ?? null,
+    flags: (r.flags ?? '').split(',').filter(Boolean),
     createdAt: r.createdAt,
     updatedAt: r.updatedAt ?? undefined,
   };
@@ -119,7 +121,8 @@ export default function Feed() {
     (async () => {
       try {
         const { data } = await getClient().models.Report.list({ limit: 200 });
-        const items = (data ?? []).map(toItem);
+        // Reports awaiting staff review never show on the public Feed.
+        const items = (data ?? []).map(toItem).filter((r) => r.status !== 'PENDING');
         items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
         if (!alive) return;
         setReports(items.length === 0 && DEMO ? SEED_REPORTS : items);

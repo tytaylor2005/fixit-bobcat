@@ -27,7 +27,7 @@ export type Category = (typeof CATEGORIES)[number];
 export const SEVERITIES = ['LOW', 'MEDIUM', 'HIGH'] as const;
 export type Severity = (typeof SEVERITIES)[number];
 
-export const STATUSES = ['OPEN', 'FIXED'] as const;
+export const STATUSES = ['OPEN', 'FIXED', 'PENDING'] as const;
 export type Status = (typeof STATUSES)[number];
 
 export const CATEGORY_LABELS: Record<Category, string> = {

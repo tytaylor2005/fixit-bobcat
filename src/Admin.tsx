@@ -9,7 +9,17 @@ import { usd } from './format';
 import type { ReportItem } from './seed';
 
 type AuthState = 'checking' | 'out' | 'in';
-type Filter = 'OPEN' | 'FIXED' | 'ALL';
+type Filter = 'REVIEW' | 'OPEN' | 'FIXED' | 'ALL';
+
+const FLAG_LABELS: Record<string, string> = {
+  NO_ISSUE: 'AI saw no issue',
+  NOT_CAMPUS: 'Not campus',
+  SUSPICIOUS: 'Suspicious image',
+  UNKNOWN: 'AI could not read photo',
+  LOW_CONFIDENCE: 'Low confidence',
+  POSSIBLE_DUPLICATE: 'Possible duplicate',
+  STUDENT_OVERRIDE: 'Student insisted',
+};
 type Patch = { status?: 'OPEN' | 'FIXED'; estimatedCost?: number | null; actualCost?: number | null };
 
 /** "" → null (clear), "120" → 120, garbage → undefined (invalid, ignore). */
@@ -181,6 +191,22 @@ export default function Admin() {
   };
 
   const reopen = (r: ReportItem) => void patch(r.id, { status: 'OPEN' });
+  const approve = (r: ReportItem) => void patch(r.id, { status: 'OPEN' });
+
+  const reject = async (r: ReportItem) => {
+    setBusyId(r.id);
+    setSaveError('');
+    try {
+      const { errors } = await getStaffClient().models.Report.delete({ id: r.id });
+      if (errors?.length) throw new Error(errors[0].message);
+      setReports((prev) => prev.filter((x) => x.id !== r.id));
+    } catch (err) {
+      console.error('reject failed', err);
+      setSaveError("Couldn't reject that report. Try again.");
+    } finally {
+      setBusyId('');
+    }
+  };
 
   const doSignOut = async () => {
     await signOut();
@@ -190,7 +216,9 @@ export default function Admin() {
 
   const openItems = reports.filter((r) => r.status === 'OPEN');
   const fixedItems = reports.filter((r) => r.status === 'FIXED');
-  const visible = filter === 'ALL' ? reports : filter === 'OPEN' ? openItems : fixedItems;
+  const pendingItems = reports.filter((r) => r.status === 'PENDING');
+  const visible =
+    filter === 'ALL' ? reports : filter === 'OPEN' ? openItems : filter === 'FIXED' ? fixedItems : pendingItems;
 
   return (
     <div className="app">
@@ -226,10 +254,10 @@ export default function Admin() {
 
         {auth === 'in' && (
           <>
-            <Analytics reports={reports} />
+            <Analytics reports={reports.filter((r) => r.status !== 'PENDING')} />
 
             <div className="filters" role="tablist" aria-label="Filter reports">
-              {(['OPEN', 'FIXED', 'ALL'] as Filter[]).map((f) => (
+              {(['REVIEW', 'OPEN', 'FIXED', 'ALL'] as Filter[]).map((f) => (
                 <button
                   key={f}
                   type="button"
@@ -238,7 +266,9 @@ export default function Admin() {
                   className={`filter ${filter === f ? 'filter-active' : ''}`}
                   onClick={() => setFilter(f)}
                 >
-                  {f === 'OPEN'
+                  {f === 'REVIEW'
+                    ? `Review (${pendingItems.length})`
+                    : f === 'OPEN'
                     ? `Open (${openItems.length})`
                     : f === 'FIXED'
                       ? `Fixed (${fixedItems.length})`
@@ -260,7 +290,7 @@ export default function Admin() {
               <section className="empty">
                 <Bobcat mood={filter === 'OPEN' ? 'happy' : 'sleepy'} size={92} />
                 <p className="empty-text">
-                  {filter === 'OPEN' ? 'Nothing open. Nice work.' : 'Nothing here yet.'}
+                  {filter === 'OPEN' ? 'Nothing open. Nice work.' : filter === 'REVIEW' ? 'Nothing waiting for review.' : 'Nothing here yet.'}
                 </p>
               </section>
             )}
@@ -281,6 +311,10 @@ export default function Admin() {
                   <div className="chips">
                     <span className={severityClass(r.severity)}>{r.severity} severity</span>
                     <DeltaChip r={r} />
+                    {r.status === 'PENDING' && <span className="chip chip-review">Needs review</span>}
+                    {r.flags.map((f) => (
+                      <span key={f} className="chip chip-flag">{FLAG_LABELS[f] ?? f}</span>
+                    ))}
                   </div>
                 </div>
 
@@ -324,7 +358,26 @@ export default function Admin() {
                     </div>
                   </div>
 
-                  {r.status === 'OPEN' ? (
+                  {r.status === 'PENDING' ? (
+                    <div className="row-2">
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => reject(r)}
+                        disabled={busyId === r.id}
+                      >
+                        Reject
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => approve(r)}
+                        disabled={busyId === r.id}
+                      >
+                        {busyId === r.id ? 'Saving…' : '✓ Approve'}
+                      </button>
+                    </div>
+                  ) : r.status === 'OPEN' ? (
                     fixingId === r.id ? (
                       <div className="fix-panel">
                         <label className="label" htmlFor={`actual-${r.id}`}>What did it actually cost? ($)</label>

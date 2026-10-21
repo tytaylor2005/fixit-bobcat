@@ -73,6 +73,14 @@ Open `/#admin` (for example http://localhost:5173/#admin). Staff sign in with a 
 
 The demo staff login is in `STAFF-LOGIN.local.md` on the driver's laptop (git-ignored). That file also has the two CLI commands to add more staff accounts.
 
+## Abuse guards
+
+Bobcat rates every photo for relevance and confidence. Photos with no visible issue, non-campus scenes, screenshots, and low-confidence results are not posted directly: the student can pick another photo or send it to staff, where it lands in a **Review** tab (approve or reject). Possible duplicates (same building and category within 24 hours) prompt "same issue?" and are flagged for staff. Each device can post 5 reports an hour. See `US-11` in the requirements for the full list and the next layers (WAF rate limit, Bedrock Guardrails image filters).
+
+## Walkthrough
+
+A four-step walkthrough with real screenshots opens on first visit and can be replayed from the footer or the How-it-works card.
+
 ## Deploying the site
 
 `bash scripts/deploy-hosting.sh` builds the frontend and publishes it to Amplify Hosting as a manual zip deployment (no GitHub connection needed). The hosted site uses the same sandbox backend, so keep `npx ampx sandbox` running on the driver's laptop during the demo.

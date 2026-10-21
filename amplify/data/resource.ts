@@ -13,9 +13,10 @@ const schema = a.schema({
       impactScore: a.integer(), // 1–10, used for the stat tile
       severity: a.enum(['LOW', 'MEDIUM', 'HIGH']),
       action: a.string(),
-      status: a.enum(['OPEN', 'FIXED']),
+      status: a.enum(['OPEN', 'FIXED', 'PENDING_REVIEW']),
       estimatedCost: a.float(), // expected repair cost in USD (AI-suggested, staff-editable)
       actualCost: a.float(), // what the fix really cost, entered by staff when marking fixed
+      flags: a.string(), // comma-separated abuse/quality flags, e.g. NO_ISSUE,STUDENT_OVERRIDE
     })
     .authorization((allow) => [
       // Students (no account): report and browse.
@@ -33,6 +34,8 @@ const schema = a.schema({
     severity: a.string(),
     action: a.string(),
     estimatedCost: a.float(),
+    relevance: a.string(),
+    confidence: a.float(),
   }),
 
   analyze: a

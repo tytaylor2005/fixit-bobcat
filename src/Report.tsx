@@ -5,6 +5,7 @@ import { BUILDINGS, CATEGORY_LABELS, type Category, type Severity } from './buil
 import { Bobcat, BrandMark } from './art';
 import { usd } from './format';
 import { CHEERS, TIPS, pick } from './personality';
+import { timeAgo } from './Feed';
 
 type Phase = 'idle' | 'picked' | 'analyzing' | 'result' | 'submitting' | 'done' | 'error';
 
@@ -17,7 +18,11 @@ interface Analysis {
   severity: Severity;
   action: string;
   estimatedCost: number | null;
+  relevance: string;
+  confidence: number;
 }
+
+type DoneKind = 'posted' | 'review' | 'duplicate';
 
 interface ReportProps {
   onViewFeed: () => void;
@@ -35,6 +40,46 @@ const rememberedBuilding = (): string => {
     return BUILDINGS[0];
   }
 };
+
+/* ---- abuse guards: per-device throttle + duplicate lookup ---- */
+const MAX_PER_HOUR = 5;
+const SUBMITS_KEY = 'fixit.submits';
+const HOUR = 60 * 60 * 1000;
+
+function recentSubmits(): number[] {
+  try {
+    const arr = JSON.parse(localStorage.getItem(SUBMITS_KEY) ?? '[]') as number[];
+    const cutoff = Date.now() - HOUR;
+    return arr.filter((t) => typeof t === 'number' && t > cutoff);
+  } catch {
+    return [];
+  }
+}
+
+function recordSubmit() {
+  try {
+    localStorage.setItem(SUBMITS_KEY, JSON.stringify([...recentSubmits(), Date.now()]));
+  } catch {
+    /* private mode: ignore */
+  }
+}
+
+/** Most recent OPEN report with the same building + category in the last 24 h, if any. */
+async function findDuplicate(building: string, category: Category) {
+  try {
+    const since = Date.now() - 24 * HOUR;
+    const { data } = await getClient().models.Report.list({
+      filter: { building: { eq: building }, category: { eq: category }, status: { eq: 'OPEN' } },
+      limit: 50,
+    });
+    const recent = (data ?? [])
+      .filter((r) => new Date(r.createdAt).getTime() >= since)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return recent.length ? { title: recent[0].title, createdAt: recent[0].createdAt } : null;
+  } catch {
+    return null;
+  }
+}
 
 const CATEGORY_SET = new Set<string>(['WATER', 'ENERGY', 'WASTE', 'DAMAGE', 'OTHER']);
 const SEVERITY_SET = new Set<string>(['LOW', 'MEDIUM', 'HIGH']);
@@ -125,6 +170,10 @@ export default function Report({ onViewFeed }: ReportProps) {
   const [elapsedSec, setElapsedSec] = useState<number | null>(null);
   const [tip] = useState(() => pick(TIPS));
   const [cheer] = useState(() => pick(CHEERS));
+  const [dupe, setDupe] = useState<{ title: string; createdAt: string } | null>(null);
+  const [dupeDismissed, setDupeDismissed] = useState(false);
+  const [overrideGate, setOverrideGate] = useState(false);
+  const [doneKind, setDoneKind] = useState<DoneKind>('posted');
 
   // Once a photo is picked, bring the primary action into view on small screens.
   useEffect(() => {
@@ -147,6 +196,9 @@ export default function Report({ onViewFeed }: ReportProps) {
     setPhotoKey('');
     setAnalysis(null);
     setErrorMsg('');
+    setDupe(null);
+    setDupeDismissed(false);
+    setOverrideGate(false);
     setPhase('picked');
   };
 
@@ -158,6 +210,10 @@ export default function Report({ onViewFeed }: ReportProps) {
     setErrorMsg('');
     startedAtRef.current = null;
     setElapsedSec(null);
+    setDupe(null);
+    setDupeDismissed(false);
+    setOverrideGate(false);
+    setDoneKind('posted');
     setPhase('idle');
     if (cameraRef.current) cameraRef.current.value = '';
     if (libraryRef.current) libraryRef.current.value = '';
@@ -193,11 +249,14 @@ export default function Report({ onViewFeed }: ReportProps) {
         severity: (SEVERITY_SET.has(severity) ? severity : 'MEDIUM') as Severity,
         action: data.action ?? '',
         estimatedCost: typeof data.estimatedCost === 'number' ? data.estimatedCost : null,
+        relevance: String(data.relevance ?? 'ISSUE').toUpperCase(),
+        confidence: typeof data.confidence === 'number' ? data.confidence : 0.6,
       };
       setAnalysis(result);
       setTitle(result.title);
       setDescription(result.description);
       setPhase('result');
+      if (result.relevance === 'ISSUE') void findDuplicate(building, result.category).then(setDupe);
     } catch (err) {
       console.error('analyze failed', err);
       const timedOut = err instanceof Error && err.message === 'timeout';
@@ -210,8 +269,20 @@ export default function Report({ onViewFeed }: ReportProps) {
     }
   };
 
+  const needsReview = analysis !== null && (analysis.relevance !== 'ISSUE' || analysis.confidence < 0.4);
+
   const submit = async () => {
     if (!analysis || !photoKey) return;
+    const recent = recentSubmits();
+    if (recent.length >= MAX_PER_HOUR) {
+      const wait = Math.max(1, Math.ceil((recent[0] + HOUR - Date.now()) / 60000));
+      setErrorMsg(`Bobcat needs a breather: ${MAX_PER_HOUR} reports an hour per device. Try again in about ${wait} min.`);
+      return;
+    }
+    const flags: string[] = [];
+    if (analysis.relevance !== 'ISSUE') flags.push(analysis.relevance, 'STUDENT_OVERRIDE');
+    if (analysis.confidence < 0.4) flags.push('LOW_CONFIDENCE');
+    if (dupe) flags.push('POSSIBLE_DUPLICATE');
     setPhase('submitting');
     try {
       const { errors } = await getClient().models.Report.create({
@@ -224,13 +295,16 @@ export default function Report({ onViewFeed }: ReportProps) {
         impactScore: analysis.impactScore,
         severity: analysis.severity,
         action: analysis.action,
-        status: 'OPEN',
+        status: needsReview ? 'PENDING_REVIEW' : 'OPEN',
         estimatedCost: analysis.estimatedCost,
+        flags: flags.length ? flags.join(',') : undefined,
       });
       if (errors?.length) throw new Error(errors[0].message);
+      recordSubmit();
       if (startedAtRef.current !== null) {
         setElapsedSec(Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)));
       }
+      setDoneKind(needsReview ? 'review' : 'posted');
       setPhase('done');
     } catch (err) {
       console.error('submit failed', err);
@@ -248,8 +322,14 @@ export default function Report({ onViewFeed }: ReportProps) {
         <div className="hero hero-center">
           <Bobcat mood="happy" size={104} />
         </div>
-        <div className="success">✅ Reported. Thanks, Bobcat.</div>
-        <p className="cheer">{cheer}</p>
+        <div className="success">
+          {doneKind === 'duplicate'
+            ? '✅ Thanks! That one is already on the Feed.'
+            : doneKind === 'review'
+              ? '✅ Sent to staff for review.'
+              : '✅ Reported. Thanks, Bobcat.'}
+        </div>
+        {doneKind === 'posted' && <p className="cheer">{cheer}</p>}
         {elapsedSec !== null && (
           <p className="muted reported-in">⏱️ Reported in {elapsedSec} second{elapsedSec === 1 ? '' : 's'}</p>
         )}
@@ -258,7 +338,13 @@ export default function Report({ onViewFeed }: ReportProps) {
             💵 {analysis.estimatedCost > 0 ? `Bobcat estimates this fix at ${usd(analysis.estimatedCost)}` : 'Quick fix, no parts needed'}
           </p>
         )}
-        <p className="muted">Facilities can see it on the Feed now.</p>
+        <p className="muted">
+          {doneKind === 'duplicate'
+            ? 'Facilities already has it on the list. Thanks for checking.'
+            : doneKind === 'review'
+              ? 'Staff will take a look before it goes public.'
+              : 'Facilities can see it on the Feed now.'}
+        </p>
         <button type="button" className="btn btn-primary" onClick={onViewFeed}>
           See the Feed
         </button>
@@ -296,6 +382,59 @@ export default function Report({ onViewFeed }: ReportProps) {
         </button>
         <button type="button" className="btn btn-secondary" onClick={reset}>
           Pick a different photo
+        </button>
+      </section>
+    );
+  }
+
+  if ((phase === 'result' || phase === 'submitting') && analysis && analysis.relevance !== 'ISSUE' && !overrideGate) {
+    const msg =
+      analysis.relevance === 'NO_ISSUE'
+        ? "Bobcat looked closely and didn't spot anything wasteful or broken."
+        : analysis.relevance === 'NOT_CAMPUS'
+          ? "This doesn't look like a campus building, room, or grounds."
+          : analysis.relevance === 'SUSPICIOUS'
+            ? 'This looks like a screenshot, drawing, or stock image rather than a photo you took.'
+            : "Bobcat couldn't read this photo well enough to be sure.";
+    return (
+      <section className="card report-card">
+        <Stepper phase={phase} />
+        {previewUrl && <img className="preview" src={previewUrl} alt="Your photo" />}
+        <div className="notice">
+          <h3 className="notice-title">Hmm, not sure about this one</h3>
+          <p className="muted">{msg} If it really is a problem, send it to staff and they'll check before it goes public.</p>
+        </div>
+        <label htmlFor="photo-library" className="btn btn-primary">Pick a different photo</label>
+        <button type="button" className="btn btn-secondary" onClick={() => setOverrideGate(true)}>
+          It's real, send it for review
+        </button>
+      </section>
+    );
+  }
+
+  if ((phase === 'result' || phase === 'submitting') && analysis && dupe && !dupeDismissed) {
+    return (
+      <section className="card report-card">
+        <Stepper phase={phase} />
+        {previewUrl && <img className="preview" src={previewUrl} alt="Your photo" />}
+        <div className="notice">
+          <h3 className="notice-title">Already on the Feed?</h3>
+          <p className="muted">
+            "{dupe.title}" was reported in {building} {timeAgo(dupe.createdAt)}. Is this the same issue?
+          </p>
+        </div>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            setDoneKind('duplicate');
+            setPhase('done');
+          }}
+        >
+          Yes, same issue
+        </button>
+        <button type="button" className="btn btn-secondary" onClick={() => setDupeDismissed(true)}>
+          No, it's different
         </button>
       </section>
     );
@@ -345,6 +484,10 @@ export default function Report({ onViewFeed }: ReportProps) {
         </p>
         <p className="muted">🛠️ {analysis.action}</p>
 
+        {needsReview && (
+          <p className="muted">🤔 Bobcat wasn't sure about this one, so staff will check it before it goes public.</p>
+        )}
+        {dupe && dupeDismissed && <p className="muted">Flagged as a possible duplicate so staff can compare.</p>}
         {errorMsg && <div className="error" role="alert">{errorMsg}</div>}
 
         <button
@@ -353,7 +496,7 @@ export default function Report({ onViewFeed }: ReportProps) {
           onClick={submit}
           disabled={phase === 'submitting'}
         >
-          {phase === 'submitting' ? 'Saving…' : 'Submit report'}
+          {phase === 'submitting' ? 'Saving…' : needsReview ? 'Send for review' : 'Submit report'}
         </button>
         <button type="button" className="btn btn-secondary" onClick={reset} disabled={phase === 'submitting'}>
           Start over

@@ -90,3 +90,12 @@ A hand-drawn inline-SVG bobcat mascot appears on the student hero, loading, succ
 
 ### US-10: Personality
 The student hero shows a rotating "Bobcat fact"; the confirmation screen adds a rotating thank-you line; feed category tags are tinted by category; a faint paw-print pattern sits behind the page.
+
+### US-11: Abuse guards
+1. The Lambda returns `relevance` (ISSUE / NO_ISSUE / NOT_CAMPUS / SUSPICIOUS) and `confidence`. Photos that are not a real issue are not posted; the student can pick another photo or send it to staff for review.
+2. Low-confidence or overridden reports are saved as `PENDING_REVIEW`, hidden from the public Feed, and shown to staff under a Review tab with Approve / Reject.
+3. Before posting, the app checks for an open report with the same building and category in the last 24 hours and asks "same issue?"; a confirmed duplicate is not posted, a dismissed one is flagged for staff.
+4. Each device may post at most 5 reports per hour.
+
+### US-12: Walkthrough and benefits
+A four-step walkthrough with real app screenshots opens on a student's first visit (and from the footer or How-it-works at any time). The How-it-works card lists benefits for students and for Facilities.

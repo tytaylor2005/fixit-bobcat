@@ -14,6 +14,7 @@ const BUCKET = process.env.FIXIT_BUCKET ?? '';
 
 const CATEGORIES = ['WATER', 'ENERGY', 'WASTE', 'DAMAGE', 'OTHER'] as const;
 const SEVERITIES = ['LOW', 'MEDIUM', 'HIGH'] as const;
+const RELEVANCE = ['ISSUE', 'NO_ISSUE', 'NOT_CAMPUS', 'SUSPICIOUS'] as const;
 
 type Analysis = {
   category: string;
@@ -24,6 +25,8 @@ type Analysis = {
   severity: string;
   action: string;
   estimatedCost: number | null;
+  relevance: string;
+  confidence: number;
 };
 
 const FALLBACK: Analysis = {
@@ -36,6 +39,8 @@ const FALLBACK: Analysis = {
   severity: 'MEDIUM',
   action: 'Send someone to check.',
   estimatedCost: null,
+  relevance: 'UNKNOWN',
+  confidence: 0.2,
 };
 
 const buildPrompt = (building: string) => `You are FixIt Bobcat, a campus sustainability assistant for Georgia College & State University.
@@ -48,7 +53,9 @@ Identify the waste or maintenance problem and respond with ONLY a JSON object, n
  "impactScore":1-10 integer (10 = worst),
  "severity":"exactly one of: LOW, MEDIUM, HIGH",
  "action":"one sentence telling facilities what to do",
- "estimatedCost":rough cost in US dollars for facilities to fix this, as a plain number with no $ sign (0 if nothing to fix)}
+ "estimatedCost":rough cost in US dollars for facilities to fix this, as a plain number with no $ sign (0 if nothing to fix),
+ "relevance":"exactly one of: ISSUE, NO_ISSUE, NOT_CAMPUS, SUSPICIOUS. NO_ISSUE = nothing wasteful or broken is visible. NOT_CAMPUS = clearly not a school building, room, or grounds. SUSPICIOUS = a screenshot, a photo of a screen, a meme, a drawing, or a stock image.",
+ "confidence":a number from 0 to 1 for how sure you are that a real problem is visible}
 If the photo shows nothing wrong, use category OTHER, severity LOW, impactScore 1, and say so kindly.`;
 
 const imageFormatFor = (key: string): ImageFormat => {
@@ -120,6 +127,10 @@ const normalize = (raw: Record<string, unknown>): Analysis => {
   const severity = pickEnum(raw.severity, SEVERITIES) ?? 'MEDIUM';
   const score = Math.round(Number(raw.impactScore));
   const cost = Number(String(raw.estimatedCost ?? '').replace(/[^0-9.]/g, ''));
+  const scoreOk = Number.isFinite(score) ? score : 3;
+  const relevance =
+    pickEnum(raw.relevance, RELEVANCE) ?? (category === 'OTHER' && scoreOk <= 1 ? 'NO_ISSUE' : 'ISSUE');
+  const conf = Number(raw.confidence);
   return {
     category,
     title,
@@ -129,6 +140,8 @@ const normalize = (raw: Record<string, unknown>): Analysis => {
     severity,
     action,
     estimatedCost: Number.isFinite(cost) && cost >= 0 ? Math.round(cost) : null,
+    relevance,
+    confidence: Number.isFinite(conf) ? Math.min(1, Math.max(0, conf)) : 0.6,
   };
 };
 

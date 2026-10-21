@@ -44,3 +44,4 @@ Target times are from the start of the build clock. Driver: check each box only 
 - [x] 18. Costs: `actualCost` on the Report model; estimate shown on the student result + confirmation and on feed cards; staff "Mark fixed" asks for the actual cost; estimated → actual comparison and tiles in the staff console.
 - [x] 19. Personality: inline-SVG bobcat mascot (moods + hard hat + magnifying glass) across student and staff states, speech-bubble hero, "Bobcat spots" row, paw-print background.
 - [x] 20. Staff analytics (`src/Analytics.tsx`): KPI row, category / severity / building / 7-day charts, resolution meter, table view, CSV export. Personality: Bobcat facts, cheer lines, tinted tags, paw pattern.
+- [x] 21. Abuse guards: relevance gate + confidence from the Lambda, PENDING_REVIEW status with staff Review tab (approve/reject), duplicate prompt, per-device throttle. Walkthrough (first visit + replay) with screenshots, benefits section.

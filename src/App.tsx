@@ -4,6 +4,7 @@ import Feed from './Feed';
 import Admin from './Admin';
 import HowItWorks from './HowItWorks';
 import { BrandMark } from './art';
+import Walkthrough, { WALKTHROUGH_KEY } from './Walkthrough';
 
 export type Tab = 'report' | 'feed';
 
@@ -36,6 +37,22 @@ export default function App() {
   const hash = useHash();
   const desktop = useDesktop();
   const feedRef = useRef<HTMLDivElement>(null);
+  const [walkthrough, setWalkthrough] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(WALKTHROUGH_KEY);
+    } catch {
+      return false;
+    }
+  });
+  const closeWalkthrough = () => {
+    try {
+      localStorage.setItem(WALKTHROUGH_KEY, '1');
+    } catch {
+      /* private mode: ignore */
+    }
+    setWalkthrough(false);
+  };
+  const openWalkthrough = () => setWalkthrough(true);
 
   // "#how" (top bar + footer link) must work even when the Feed tab is showing on a phone.
   useEffect(() => {
@@ -97,7 +114,7 @@ export default function App() {
         <main className="container content content-desktop">
           <div className="col">
             <Report onViewFeed={viewFeed} />
-            <HowItWorks />
+            <HowItWorks onWalkthrough={openWalkthrough} />
           </div>
           <div className="col" ref={feedRef}>
             <Feed />
@@ -108,7 +125,7 @@ export default function App() {
           {tab === 'report' ? (
             <>
               <Report onViewFeed={viewFeed} />
-              <HowItWorks />
+              <HowItWorks onWalkthrough={openWalkthrough} />
             </>
           ) : (
             <Feed />
@@ -125,9 +142,13 @@ export default function App() {
         <div>
           <a className="link" href="#how">How it works</a>
           <span className="footer-dot" aria-hidden="true">·</span>
+          <button type="button" className="link link-btn" onClick={openWalkthrough}>Walkthrough</button>
+          <span className="footer-dot" aria-hidden="true">·</span>
           <a className="link" href="#admin">Staff sign in</a>
         </div>
       </footer>
+
+      {walkthrough && hash !== '#admin' && <Walkthrough onClose={closeWalkthrough} />}
     </div>
   );
 }

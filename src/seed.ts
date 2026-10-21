@@ -15,6 +15,7 @@ export interface ReportItem {
   status: Status;
   estimatedCost: number | null;
   actualCost: number | null;
+  flags: string[];
   createdAt: string;
   updatedAt?: string;
 }
@@ -25,6 +26,7 @@ const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString(
 export const SEED_REPORTS: ReportItem[] = [
   {
     id: 'seed-1',
+    flags: [],
     actualCost: null,
     estimatedCost: 120,
     photoKey: 'seed/beeson-faucet.jpg',
@@ -42,6 +44,7 @@ export const SEED_REPORTS: ReportItem[] = [
   },
   {
     id: 'seed-2',
+    flags: [],
     actualCost: null,
     estimatedCost: 0,
     photoKey: 'seed/arts-sciences-lights.jpg',
@@ -59,6 +62,7 @@ export const SEED_REPORTS: ReportItem[] = [
   },
   {
     id: 'seed-3',
+    flags: [],
     actualCost: null,
     estimatedCost: 25,
     photoKey: 'seed/library-recycling.jpg',
@@ -76,6 +80,7 @@ export const SEED_REPORTS: ReportItem[] = [
   },
   {
     id: 'seed-4',
+    flags: [],
     actualCost: 410,
     estimatedCost: 350,
     photoKey: 'seed/wells-fountain.jpg',
@@ -93,6 +98,7 @@ export const SEED_REPORTS: ReportItem[] = [
   },
   {
     id: 'seed-5',
+    flags: [],
     actualCost: 45,
     estimatedCost: 60,
     photoKey: 'seed/wellness-doors.jpg',

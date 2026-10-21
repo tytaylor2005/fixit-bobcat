@@ -54,7 +54,23 @@ const FAQ = [
   },
 ];
 
-export default function HowItWorks() {
+const STUDENT_BENEFITS = [
+  { icon: '⚡', title: 'Ten seconds', text: 'Photo to Feed, start to finish.' },
+  { icon: '🙈', title: 'No account', text: 'No sign-up, no name, no email.' },
+  { icon: '✍️', title: 'Bobcat writes it', text: 'Title, description, severity, impact, cost.' },
+  { icon: '📊', title: 'Real numbers', text: 'Gallons, kWh, pounds, and dollars.' },
+  { icon: '👀', title: 'See it fixed', text: 'The Feed shows the fix and what it cost.' },
+  { icon: '🌱', title: 'Less waste', text: 'Every report is water, power, or material saved.' },
+];
+
+const STAFF_BENEFITS = [
+  { icon: '🗂️', title: 'A triage queue', text: 'Photos, severity, location, and a suggested fix.' },
+  { icon: '💵', title: 'Costs that add up', text: 'Expected vs actual on every fix.' },
+  { icon: '📈', title: 'Campus analytics', text: 'Categories, hot spots, trends, CSV export.' },
+  { icon: '🛡️', title: 'Built-in guardrails', text: 'AI relevance gate, duplicate check, review queue.' },
+];
+
+export default function HowItWorks({ onWalkthrough }: { onWalkthrough?: () => void }) {
   return (
     <section className="card how" id="how">
       <div className="hero">
@@ -79,6 +95,34 @@ export default function HowItWorks() {
           </li>
         ))}
       </ol>
+
+      <div className="benefits">
+        <h3 className="how-h3">Why students use it</h3>
+        <ul className="benefit-grid">
+          {STUDENT_BENEFITS.map((b) => (
+            <li key={b.title} className="benefit">
+              <span className="benefit-icon" aria-hidden="true">{b.icon}</span>
+              <span className="benefit-title">{b.title}</span>
+              <span className="benefit-text">{b.text}</span>
+            </li>
+          ))}
+        </ul>
+        <h3 className="how-h3">Why Facilities likes it</h3>
+        <ul className="benefit-grid">
+          {STAFF_BENEFITS.map((b) => (
+            <li key={b.title} className="benefit">
+              <span className="benefit-icon" aria-hidden="true">{b.icon}</span>
+              <span className="benefit-title">{b.title}</span>
+              <span className="benefit-text">{b.text}</span>
+            </li>
+          ))}
+        </ul>
+        {onWalkthrough && (
+          <button type="button" className="btn btn-secondary" onClick={onWalkthrough}>
+            ▶ Watch the 4-step walkthrough
+          </button>
+        )}
+      </div>
 
       <div className="faq">
         {FAQ.map((f) => (
