@@ -10,8 +10,8 @@ Target times are from the start of the build clock. Driver: check each box only 
 
 ## Phase 2 — Backend (target: done by minute 35)
 
-- [ ] 4. Write `amplify/storage/resource.ts`, `amplify/data/resource.ts`, `amplify/functions/analyze/resource.ts` and `backend.ts` exactly as in design.md.
-- [ ] 5. Write `amplify/functions/analyze/handler.ts`: S3 GetObject → Bedrock Converse → parse JSON → fallback on failure. Log the raw model text with `console.log` so we can debug in CloudWatch.
+- [x] 4. Write `amplify/storage/resource.ts`, `amplify/data/resource.ts`, `amplify/functions/analyze/resource.ts` and `backend.ts` exactly as in design.md.
+- [x] 5. Write `amplify/functions/analyze/handler.ts`: S3 GetObject → Bedrock Converse → parse JSON → fallback on failure. Log the raw model text with `console.log` so we can debug in CloudWatch.
 - [ ] 6. Start `npx ampx sandbox` in a separate terminal and leave it running. Confirm `amplify_outputs.json` appears. Add `Amplify.configure(outputs)` in `main.tsx`. **AWS teammate owns this terminal from here.**
 
 ## Phase 3 — Report flow (target: done by minute 55)
