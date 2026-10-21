@@ -12,11 +12,11 @@ Target times are from the start of the build clock. Driver: check each box only 
 
 - [x] 4. Write `amplify/storage/resource.ts`, `amplify/data/resource.ts`, `amplify/functions/analyze/resource.ts` and `backend.ts` exactly as in design.md.
 - [x] 5. Write `amplify/functions/analyze/handler.ts`: S3 GetObject → Bedrock Converse → parse JSON → fallback on failure. Log the raw model text with `console.log` so we can debug in CloudWatch.
-- [ ] 6. Start `npx ampx sandbox` in a separate terminal and leave it running. Confirm `amplify_outputs.json` appears. Add `Amplify.configure(outputs)` in `main.tsx`. **AWS teammate owns this terminal from here.**
+- [x] 6. Start `npx ampx sandbox` in a separate terminal and leave it running. Confirm `amplify_outputs.json` appears. Add `Amplify.configure(outputs)` in `main.tsx`. **AWS teammate owns this terminal from here.**
 
 ## Phase 3 — Report flow (target: done by minute 55)
 
-- [ ] 7. `Report.tsx`: photo picker (camera on mobile) → preview → building dropdown → Analyze button. Upload to S3 with `uploadData`, then call `client.queries.analyze`. Show "Bobcat is looking…" while waiting; 25 s timeout → friendly error + Try again.
+- [x] 7. `Report.tsx`: photo picker (camera on mobile) → preview → building dropdown → Analyze button. Upload to S3 with `uploadData`, then call `client.queries.analyze`. Show "Bobcat is looking…" while waiting; 25 s timeout → friendly error + Try again.
 - [ ] 8. Result card: category chip, severity chip, editable title + description inputs, impact line, suggested action, "Submit report" button → `Report.create`. Confirmation state with "See the Feed" button that switches tabs.
 - [ ] 9. **End-to-end test with a real photo from a phone.** If it works, commit and tell the Pitch lead the demo is live. If Bedrock fails, apply the design.md fallback NOW, not later.
 
