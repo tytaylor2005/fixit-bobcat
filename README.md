@@ -8,6 +8,24 @@ Stack: React + Vite + TypeScript · Amplify Gen 2 · Bedrock (vision) · S3 · D
 
 Specs live in `.kiro/specs/fixit-bobcat/` (requirements, design, tasks). Team plan: `TEAM-PLAN.md`.
 
+## For judges
+
+- **[PITCH.md](PITCH.md)** — the two-minute spoken pitch plus a Q&A cheat sheet (cost per report, privacy, scaling, what's next).
+- **[DEMO-SCRIPT.md](DEMO-SCRIPT.md)** — click-by-click runbook for the student flow on a phone and the staff flow on a laptop, with fallbacks.
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** — Mermaid diagram of phone → S3 → Lambda → Bedrock → DynamoDB, the authorization matrix, and why exactly three AWS services.
+
+The whole loop, left to right: snap a photo, Bedrock writes the report, confirm, it lands on the public Feed, staff triage it in the private console.
+
+<p>
+  <img src="screenshots/1-report-idle.png" alt="Report page: one big Snap a photo button" width="19%" />
+  <img src="screenshots/2-result-card.png" alt="Result card written by Bedrock: category, severity, title, description, impact, action" width="19%" />
+  <img src="screenshots/3-confirmation.png" alt="Confirmation: Reported. Thanks, Bobcat." width="19%" />
+  <img src="screenshots/4-feed.png" alt="Public Feed with stat tiles and report cards" width="19%" />
+  <img src="screenshots/5-staff-console.png" alt="Staff console: cost tiles, filters, expected cost, Mark fixed" width="19%" />
+</p>
+
+What broke and what we learned is in the section below, and in the "What we learned" beat of the pitch.
+
 ## Teammate setup (5 minutes)
 
 ```bash
