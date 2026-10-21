@@ -35,12 +35,12 @@ export default function App() {
               aria-hidden="true"
               focusable="false"
             >
-              <g fill="#C9A227">
+              <g fill="var(--gold)">
                 <g transform="rotate(45 32 32)">
                   <path d="M28 5.75 L28 17 L36 17 L36 5.75 A11 11 0 1 1 28 5.75 Z" />
                   <rect x="28" y="20" width="8" height="36" rx="4" />
                 </g>
-                <g stroke="#0A2240" strokeWidth="2">
+                <g stroke="var(--navy)" strokeWidth="2">
                   <ellipse cx="40" cy="46" rx="8.5" ry="6.5" />
                   <circle cx="30.5" cy="38.5" r="3.6" />
                   <circle cx="36.5" cy="33" r="3.8" />
