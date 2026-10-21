@@ -286,6 +286,52 @@ textarea {
   overflow: hidden;
 }
 
+/* ---------- Three-step hint ---------- */
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.step + .step::before {
+  content: '·';
+  margin-right: 6px;
+  color: var(--border);
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.reported-in {
+  font-weight: 700;
+  color: var(--green);
+}
+
 /* ---------- Photo preview ---------- */
 .preview {
   width: 100%;

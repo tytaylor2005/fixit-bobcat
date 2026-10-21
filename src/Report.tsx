@@ -79,6 +79,21 @@ export default function Report({ onViewFeed }: ReportProps) {
   const [description, setDescription] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const analyzeRef = useRef<HTMLButtonElement>(null);
+  const startedAtRef = useRef<number | null>(null);
+  const [elapsedSec, setElapsedSec] = useState<number | null>(null);
+
+  // Once a photo is picked, bring the primary action into view on small screens.
+  useEffect(() => {
+    if (phase === 'picked') analyzeRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [phase]);
+
+  // Measure photo pick -> successful submit without touching the analyze/submit logic.
+  useEffect(() => {
+    if (phase === 'done' && startedAtRef.current !== null) {
+      setElapsedSec(Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)));
+    }
+  }, [phase]);
 
   useEffect(() => {
     if (!file) return;
@@ -90,6 +105,8 @@ export default function Report({ onViewFeed }: ReportProps) {
   const onPick = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
+    startedAtRef.current = Date.now();
+    setElapsedSec(null);
     setFile(f);
     setPhotoKey('');
     setAnalysis(null);
@@ -103,6 +120,8 @@ export default function Report({ onViewFeed }: ReportProps) {
     setPhotoKey('');
     setAnalysis(null);
     setErrorMsg('');
+    startedAtRef.current = null;
+    setElapsedSec(null);
     setPhase('idle');
     if (inputRef.current) inputRef.current.value = '';
   };
@@ -186,6 +205,9 @@ export default function Report({ onViewFeed }: ReportProps) {
     return (
       <section className="card">
         <div className="success">✅ Reported. Thanks, Bobcat.</div>
+        {elapsedSec !== null && (
+          <p className="muted reported-in">⏱️ Reported in {elapsedSec} second{elapsedSec === 1 ? '' : 's'}</p>
+        )}
         <p className="muted">Facilities can see it on the Feed now.</p>
         <button type="button" className="btn btn-primary" onClick={onViewFeed}>
           See the Feed
@@ -299,9 +321,16 @@ export default function Report({ onViewFeed }: ReportProps) {
       />
 
       {phase === 'idle' ? (
-        <label htmlFor="photo" className="btn btn-primary">
-          📷 Snap a photo
-        </label>
+        <>
+          <label htmlFor="photo" className="btn btn-primary">
+            📷 Snap a photo
+          </label>
+          <ol className="steps" aria-label="How it works">
+            <li className="step"><span className="step-num">1</span>Snap</li>
+            <li className="step"><span className="step-num">2</span>Bobcat writes the report</li>
+            <li className="step"><span className="step-num">3</span>Submit</li>
+          </ol>
+        </>
       ) : (
         <>
           <div className="field">
@@ -324,7 +353,7 @@ export default function Report({ onViewFeed }: ReportProps) {
               ))}
             </select>
           </div>
-          <button type="button" className="btn btn-primary" onClick={analyze}>
+          <button ref={analyzeRef} type="button" className="btn btn-primary" onClick={analyze}>
             🔍 Analyze
           </button>
           <label htmlFor="photo" className="btn btn-secondary">
