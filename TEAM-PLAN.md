@@ -1,5 +1,19 @@
 # FixIt Bobcat — Team Plan (GCSU Kiro Codeathon, Oct 21 2026)
 
+> **CHANGE OF PLAN (final 30 minutes).** Only Ty and three Claude Code terminals are coding. The original roles below are kept for reference; the live plan is this section.
+>
+> | Who | Owns (nobody else edits these) | Prompt |
+> |---|---|---|
+> | Terminal A (original session) | `amplify/`, `ampx sandbox`, dev server :5173, demo seed data, final integration | already running |
+> | Terminal B | `src/**`, `public/**`, `index.html` — brand mark, installable on phones, student ease-of-use, feed card detail | `prompts/TERMINAL-B-frontend.md` |
+> | Terminal C | root `*.md`, `docs/`, `screenshots/` — pitch script, demo runbook, architecture, judges section | `prompts/TERMINAL-C-pitch-docs.md` |
+> | Ty | things only a human can do: phone test over LAN, take 3 real campus photos, (optional) Anthropic use-case form in Bedrock console, rehearse the pitch | — |
+>
+> **Clock:** 0–3 start B and C · 3–20 parallel build · 20–25 everyone pushes, Terminal A pulls + verifies end to end · 25–30 freeze, Ty rehearses the pitch out loud once.
+>
+> **Git protocol for every terminal:** commit only your own files (`git add <paths>`, never `-A`), then `git pull --rebase origin main && git push origin main`. Never run a second `ampx sandbox`. Never edit `amplify_outputs.json` or `STAFF-LOGIN.local.md`.
+
+
 **Track:** Environment & Sustainability · **Pitch:** See waste. Snap it. Fix it.
 **Stack:** React + Vite · Amplify Gen 2 · Amazon Bedrock (vision) · S3 · DynamoDB · Region us-east-2
 
