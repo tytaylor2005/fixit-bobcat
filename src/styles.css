@@ -76,6 +76,13 @@ textarea {
   line-height: 1;
 }
 
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: block;
+}
+
 .brand-title {
   margin: 0;
   font-size: 24px;
