@@ -4,10 +4,20 @@
   "description": "See waste. Snap it. Fix it.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0A2240",
-  "theme_color": "#0A2240",
+  "background_color": "#F5F3F1",
+  "theme_color": "#222222",
   "icons": [
-    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }

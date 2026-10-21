@@ -36,6 +36,18 @@ export default function App() {
   const desktop = useDesktop();
   const feedRef = useRef<HTMLDivElement>(null);
 
+  // "#how" (top bar + footer link) must work even when the Feed tab is showing on a phone.
+  useEffect(() => {
+    if (hash !== '#how') return;
+    const t = setTimeout(() => {
+      setTab('report');
+      requestAnimationFrame(() =>
+        document.getElementById('how')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+      );
+    }, 0);
+    return () => clearTimeout(t);
+  }, [hash]);
+
   if (hash === '#admin') return <Admin />;
 
   const viewFeed = () => {

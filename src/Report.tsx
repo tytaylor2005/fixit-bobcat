@@ -128,13 +128,6 @@ export default function Report({ onViewFeed }: ReportProps) {
     if (phase === 'picked') analyzeRef.current?.scrollIntoView({ block: 'nearest' });
   }, [phase]);
 
-  // Measure photo pick -> successful submit without touching the analyze/submit logic.
-  useEffect(() => {
-    if (phase === 'done' && startedAtRef.current !== null) {
-      setElapsedSec(Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)));
-    }
-  }, [phase]);
-
   useEffect(() => {
     if (!file) return;
     const url = URL.createObjectURL(file);
@@ -232,6 +225,9 @@ export default function Report({ onViewFeed }: ReportProps) {
         estimatedCost: analysis.estimatedCost,
       });
       if (errors?.length) throw new Error(errors[0].message);
+      if (startedAtRef.current !== null) {
+        setElapsedSec(Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000)));
+      }
       setPhase('done');
     } catch (err) {
       console.error('submit failed', err);

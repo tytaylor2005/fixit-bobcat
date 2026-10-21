@@ -103,6 +103,7 @@ export default function Admin() {
   const [costDraft, setCostDraft] = useState<Record<string, string>>({});
   const [fixingId, setFixingId] = useState('');
   const [actualDraft, setActualDraft] = useState('');
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     getCurrentUser()
@@ -136,6 +137,7 @@ export default function Admin() {
 
   const patch = async (id: string, changes: Patch): Promise<boolean> => {
     setBusyId(id);
+    setSaveError('');
     try {
       const { data, errors } = await getStaffClient().models.Report.update({ id, ...changes });
       if (errors?.length || !data) throw new Error(errors?.[0]?.message ?? 'update failed');
@@ -143,7 +145,7 @@ export default function Admin() {
       return true;
     } catch (err) {
       console.error('update failed', err);
-      alert("Couldn't save that change. Try again.");
+      setSaveError("Couldn't save that change. Check your connection and try again.");
       return false;
     } finally {
       setBusyId('');
@@ -266,6 +268,7 @@ export default function Admin() {
               </div>
             )}
             {loadError && <div className="error" role="alert">{loadError}</div>}
+            {saveError && <div className="error" role="alert">{saveError}</div>}
 
             {!loading && !loadError && visible.length === 0 && (
               <section className="empty">
