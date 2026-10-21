@@ -56,6 +56,37 @@ const imageFormatFor = (key: string): ImageFormat => {
   return 'jpeg';
 };
 
+/** Return the first balanced JSON object in `text`, ignoring braces inside strings. */
+const extractJson = (text: string): Record<string, unknown> | null => {
+  const start = text.indexOf('{');
+  if (start < 0) return null;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        try {
+          return JSON.parse(text.slice(start, i + 1)) as Record<string, unknown>;
+        } catch {
+          return null;
+        }
+      }
+    }
+  }
+  return null;
+};
+
 const str = (v: unknown, fallback: string) =>
   typeof v === 'string' && v.trim() ? v.trim() : fallback;
 
@@ -131,10 +162,9 @@ export const handler: Schema['analyze']['functionHandler'] = async (event) => {
         .join('') ?? '';
     console.log('raw model text', text);
 
-    // 3. Strict JSON: first {...} block only
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('No JSON object in model output');
-    const parsed = JSON.parse(match[0]) as Record<string, unknown>;
+    // 3. Strict JSON: first balanced {...} block only (models sometimes add stray braces)
+    const parsed = extractJson(text);
+    if (!parsed) throw new Error('No JSON object in model output');
     const result = normalize(parsed);
     console.log('analysis', result);
     return result;

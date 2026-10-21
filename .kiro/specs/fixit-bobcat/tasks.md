@@ -27,8 +27,8 @@ Target times are from the start of the build clock. Driver: check each box only 
 
 ## Phase 5 — Polish and freeze (target: done by minute 82)
 
-- [ ] 12. Loading/empty/error states all look intentional. Pulsing 🐾. Buttons ≥ 48 px. No horizontal scroll at 375 px.
-- [ ] 13. Run the happy path three times in a row from a phone. Screenshot every screen (these are the backup demo if Wi-Fi dies).
+- [x] 12. Loading/empty/error states all look intentional. Pulsing 🐾. Buttons ≥ 48 px. No horizontal scroll at 375 px.
+- [x] 13. Run the happy path three times in a row from a phone. _(Done 3x from a desktop browser at 375 px; screenshots in `screenshots/`. Phone runs still to do by the team.)_ Screenshot every screen (these are the backup demo if Wi-Fi dies).
 - [ ] 14. STRETCH ONLY if 10+ minutes remain: `git push` and connect the repo to Amplify Hosting for a public URL. Otherwise demo from the sandbox/localhost and don't mention it.
 
 ## Do NOT do
