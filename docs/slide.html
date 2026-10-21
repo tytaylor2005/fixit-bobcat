@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FixIt Bobcat</title>
+<style>
+  :root {
+    --navy: #0A2240;
+    --gold: #C9A227;
+    --paper: #F7F5EF;
+    --ink: #0A2240;
+    --muted: rgba(10, 34, 64, 0.65);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--navy); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .slide {
+    width: 1280px; height: 720px;
+    background: var(--paper);
+    display: grid;
+    grid-template-rows: 150px 1fr 120px;
+    overflow: hidden;
+    position: relative;
+  }
+  .slide::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 12px; background: var(--gold);
+  }
+  header {
+    background: var(--navy);
+    color: var(--paper);
+    display: flex; align-items: center; gap: 28px;
+    padding: 0 64px;
+  }
+  .mark {
+    width: 92px; height: 92px; border-radius: 24px;
+    background: var(--gold); color: var(--navy);
+    display: grid; place-items: center;
+    font-size: 54px; line-height: 1;
+    box-shadow: 0 6px 0 rgba(0,0,0,.25);
+  }
+  h1 { font-size: 60px; letter-spacing: -1px; color: var(--gold); line-height: 1; }
+  .tagline { font-size: 28px; margin-top: 8px; color: rgba(247,245,239,.9); }
+  .track { margin-left: auto; text-align: right; font-size: 18px; color: rgba(247,245,239,.7); line-height: 1.4; }
+
+  main {
+    padding: 24px 64px 0;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; align-items: center;
+  }
+  .step {
+    background: #fff; border-radius: 20px; padding: 28px 28px 24px;
+    box-shadow: 0 8px 24px rgba(10,34,64,.08);
+    min-height: 300px;
+    position: relative;
+  }
+  .step .num {
+    position: absolute; top: -18px; left: 24px;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--gold); color: var(--navy);
+    font-weight: 800; font-size: 20px; display: grid; place-items: center;
+  }
+  .step .icon { font-size: 56px; line-height: 1; margin-bottom: 14px; }
+  .step h2 { font-size: 34px; letter-spacing: -0.5px; margin-bottom: 10px; }
+  .step p { font-size: 20px; line-height: 1.4; color: var(--muted); }
+  .step strong { color: var(--ink); }
+
+  footer {
+    display: flex; align-items: center; gap: 20px;
+    padding: 0 64px; border-top: 2px solid rgba(10,34,64,.1);
+  }
+  footer .label { white-space: nowrap; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); font-weight: 700; }
+  .svc {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--navy); color: var(--paper);
+    border-radius: 999px; padding: 12px 22px; font-size: 19px; font-weight: 600; white-space: nowrap;
+  }
+  .svc .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--gold); }
+  footer .region { margin-left: auto; white-space: nowrap; font-size: 17px; color: var(--muted); }
+  footer .region b { color: var(--ink); }
+</style>
+</head>
+<body>
+<section class="slide" aria-label="FixIt Bobcat title slide">
+  <header>
+    <div class="mark" aria-hidden="true">🐾</div>
+    <div>
+      <h1>FixIt Bobcat</h1>
+      <div class="tagline">See waste. Snap it. Fix it.</div>
+    </div>
+    <div class="track">GCSU Kiro Codeathon · Oct 21 2026<br>Environment &amp; Sustainability</div>
+  </header>
+
+  <main>
+    <div class="step">
+      <div class="num">1</div>
+      <div class="icon" aria-hidden="true">📷</div>
+      <h2>Snap</h2>
+      <p>A student sees a running faucet, lights on in an empty room, an overflowing bin. <strong>One tap</strong>, one photo. No account, no form.</p>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <div class="icon" aria-hidden="true">🐾</div>
+      <h2>Bobcat looks</h2>
+      <p><strong>Amazon Bedrock</strong> reads the photo and writes the facilities report: category, severity, impact, suggested fix, and a repair cost. About one second.</p>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <div class="icon" aria-hidden="true">🛠️</div>
+      <h2>Fix it</h2>
+      <p>The report lands on a <strong>public Feed</strong>. Staff triage it in a private console: confirm the cost, mark it fixed, watch the tiles move.</p>
+    </div>
+  </main>
+
+  <footer>
+    <span class="label">Built on</span>
+    <span class="svc"><span class="dot"></span>Amazon Bedrock</span>
+    <span class="svc"><span class="dot"></span>Amazon S3</span>
+    <span class="svc"><span class="dot"></span>DynamoDB</span>
+    <span class="region">Amplify Gen 2 · <b>us-east-2</b> · serverless, nothing to run</span>
+  </footer>
+</section>
+</body>
+</html>
