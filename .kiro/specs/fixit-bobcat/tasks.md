@@ -17,13 +17,13 @@ Target times are from the start of the build clock. Driver: check each box only 
 ## Phase 3 — Report flow (target: done by minute 55)
 
 - [x] 7. `Report.tsx`: photo picker (camera on mobile) → preview → building dropdown → Analyze button. Upload to S3 with `uploadData`, then call `client.queries.analyze`. Show "Bobcat is looking…" while waiting; 25 s timeout → friendly error + Try again.
-- [ ] 8. Result card: category chip, severity chip, editable title + description inputs, impact line, suggested action, "Submit report" button → `Report.create`. Confirmation state with "See the Feed" button that switches tabs.
-- [ ] 9. **End-to-end test with a real photo from a phone.** If it works, commit and tell the Pitch lead the demo is live. If Bedrock fails, apply the design.md fallback NOW, not later.
+- [x] 8. Result card: category chip, severity chip, editable title + description inputs, impact line, suggested action, "Submit report" button → `Report.create`. Confirmation state with "See the Feed" button that switches tabs.
+- [x] 9. **End-to-end test with a real photo from a phone.** If it works, commit and tell the Pitch lead the demo is live. If Bedrock fails, apply the design.md fallback NOW, not later.
 
 ## Phase 4 — Feed (target: done by minute 70)
 
-- [ ] 10. `Feed.tsx`: list reports newest-first, thumbnail via `getUrl`, chips, time-ago, "Mark fixed" button. Empty state. Seed-data fallback when `VITE_DEMO=true`.
-- [ ] 11. Stat tiles at the top: Open, Fixed, Impact avoided (sum of impactScore of FIXED reports — or of all reports if that number looks better on stage).
+- [x] 10. `Feed.tsx`: list reports newest-first, thumbnail via `getUrl`, chips, time-ago, "Mark fixed" button. Empty state. Seed-data fallback when `VITE_DEMO=true`.
+- [x] 11. Stat tiles at the top: Open, Fixed, Impact avoided (sum of impactScore of FIXED reports — or of all reports if that number looks better on stage).
 
 ## Phase 5 — Polish and freeze (target: done by minute 82)
 
