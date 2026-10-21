@@ -3,6 +3,8 @@ import { getUrl } from 'aws-amplify/storage';
 import { getClient } from './client';
 import { CATEGORY_LABELS, type Category, type Severity } from './buildings';
 import { SEED_REPORTS, type ReportItem } from './seed';
+import { Bobcat } from './art';
+import { usd } from './format';
 
 const DEMO = import.meta.env.VITE_DEMO === 'true';
 
@@ -43,6 +45,7 @@ export function toItem(r: {
   action?: string | null;
   status?: string | null;
   estimatedCost?: number | null;
+  actualCost?: number | null;
   createdAt: string;
 }): ReportItem {
   return {
@@ -58,8 +61,26 @@ export function toItem(r: {
     action: r.action ?? '',
     status: r.status === 'FIXED' ? 'FIXED' : 'OPEN',
     estimatedCost: r.estimatedCost ?? null,
+    actualCost: r.actualCost ?? null,
     createdAt: r.createdAt,
   };
+}
+
+/** One line about money: the estimate while open, what it really cost once fixed. */
+export function CostLine({ r }: { r: ReportItem }) {
+  if (r.status === 'FIXED') {
+    if (r.actualCost !== null) {
+      const est = r.estimatedCost !== null && r.estimatedCost !== r.actualCost ? ` · est. ${usd(r.estimatedCost)}` : '';
+      return <p className="cost-line cost-fixed">✅ Fixed for {usd(r.actualCost)}{est}</p>;
+    }
+    return r.estimatedCost === null ? null : <p className="cost-line cost-fixed">✅ Fixed · est. {usd(r.estimatedCost)}</p>;
+  }
+  if (r.estimatedCost === null) return null;
+  return (
+    <p className="cost-line">
+      💵 {r.estimatedCost > 0 ? `Est. repair ${usd(r.estimatedCost)}` : 'Quick fix, no parts needed'}
+    </p>
+  );
 }
 
 export function Thumb({ photoKey, category }: { photoKey: string; category: Category }) {
@@ -119,7 +140,7 @@ export default function Feed() {
   if (loading) {
     return (
       <div className="loading" role="status" aria-live="polite">
-        <span className="paw" aria-hidden="true">🐾</span>
+        <Bobcat mood="curious" lens size={100} className="mascot-bob" />
         Fetching reports…
       </div>
     );
@@ -144,11 +165,12 @@ export default function Feed() {
 
       {reports.length === 0 ? (
         <section className="empty">
-          <div className="empty-emoji" aria-hidden="true">🐱</div>
+          <Bobcat mood="sleepy" size={96} />
           <p className="empty-text">Nothing reported yet. Be the first.</p>
         </section>
       ) : (
-        reports.map((r) => {
+        <div className="cards-grid">
+        {reports.map((r) => {
           const expanded = openId === r.id;
           const detailId = `feed-detail-${r.id}`;
           return (
@@ -157,7 +179,11 @@ export default function Feed() {
               className={`card feed-card ${expanded ? 'feed-card-open' : ''}`}
               onClick={() => toggle(r.id)}
             >
-              <Thumb photoKey={r.photoKey} category={r.category} />
+              <div className="tile">
+                <Thumb photoKey={r.photoKey} category={r.category} />
+                <span className="tile-tag">{CATEGORY_LABELS[r.category]}</span>
+                {r.status === 'FIXED' && <span className="tile-tag tile-tag-fixed">✓ Fixed</span>}
+              </div>
               <div className="feed-body">
                 <div className="feed-head">
                   <h3 className="feed-title">{r.title}</h3>
@@ -176,14 +202,13 @@ export default function Feed() {
                   </button>
                 </div>
                 <p className="feed-meta">
-                  📍 {r.building} · {timeAgo(r.createdAt)}
+                  {r.building} · {timeAgo(r.createdAt)}
                 </p>
                 <div className="chips">
-                  <span className="chip chip-category">{CATEGORY_LABELS[r.category]}</span>
-                  <span className={severityClass(r.severity)}>{r.severity}</span>
-                  {r.status === 'FIXED' && <span className="chip chip-fixed">✓ Fixed</span>}
+                  <span className={severityClass(r.severity)}>{r.severity} severity</span>
                 </div>
                 <p className="feed-impact">📊 {r.impact}</p>
+                <CostLine r={r} />
               </div>
               {expanded && (
                 <div id={detailId} className="feed-detail">
@@ -194,7 +219,8 @@ export default function Feed() {
               )}
             </article>
           );
-        })
+        })}
+        </div>
       )}
     </>
   );

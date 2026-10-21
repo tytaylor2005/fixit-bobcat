@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { uploadData } from 'aws-amplify/storage';
 import { getClient } from './client';
 import { BUILDINGS, CATEGORY_LABELS, type Category, type Severity } from './buildings';
+import { Bobcat } from './art';
+import { usd } from './format';
 
 type Phase = 'idle' | 'picked' | 'analyzing' | 'result' | 'submitting' | 'done' | 'error';
 
@@ -68,6 +70,43 @@ function severityClass(s: Severity) {
   return s === 'HIGH' ? 'chip chip-high' : s === 'MEDIUM' ? 'chip chip-medium' : 'chip chip-low';
 }
 
+const STAGES = ['Snap', 'Look', 'Review', 'Done'] as const;
+
+function stageOf(phase: Phase): number {
+  switch (phase) {
+    case 'idle':
+    case 'picked':
+      return 0;
+    case 'analyzing':
+    case 'error':
+      return 1;
+    case 'result':
+    case 'submitting':
+      return 2;
+    case 'done':
+      return 3;
+  }
+}
+
+/** Four-dot progress strip at the top of the report card so students always know where they are. */
+function Stepper({ phase }: { phase: Phase }) {
+  const cur = stageOf(phase);
+  return (
+    <ol className="stepper" aria-label="Progress">
+      {STAGES.map((label, i) => (
+        <li
+          key={label}
+          className={`stepper-item ${i < cur ? 'is-done' : i === cur ? 'is-current' : ''}`}
+          aria-current={i === cur ? 'step' : undefined}
+        >
+          <span className="stepper-dot" aria-hidden="true">{i < cur ? '✓' : i + 1}</span>
+          <span className="stepper-label">{label}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export default function Report({ onViewFeed }: ReportProps) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [file, setFile] = useState<File | null>(null);
@@ -78,7 +117,8 @@ export default function Report({ onViewFeed }: ReportProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const libraryRef = useRef<HTMLInputElement>(null);
   const analyzeRef = useRef<HTMLButtonElement>(null);
   const startedAtRef = useRef<number | null>(null);
   const [elapsedSec, setElapsedSec] = useState<number | null>(null);
@@ -123,7 +163,8 @@ export default function Report({ onViewFeed }: ReportProps) {
     startedAtRef.current = null;
     setElapsedSec(null);
     setPhase('idle');
-    if (inputRef.current) inputRef.current.value = '';
+    if (cameraRef.current) cameraRef.current.value = '';
+    if (libraryRef.current) libraryRef.current.value = '';
   };
 
   const analyze = async () => {
@@ -203,10 +244,19 @@ export default function Report({ onViewFeed }: ReportProps) {
 
   if (phase === 'done') {
     return (
-      <section className="card">
+      <section className="card report-card">
+        <Stepper phase={phase} />
+        <div className="hero hero-center">
+          <Bobcat mood="happy" size={104} />
+        </div>
         <div className="success">✅ Reported. Thanks, Bobcat.</div>
         {elapsedSec !== null && (
           <p className="muted reported-in">⏱️ Reported in {elapsedSec} second{elapsedSec === 1 ? '' : 's'}</p>
+        )}
+        {analysis && analysis.estimatedCost !== null && (
+          <p className="cost-line">
+            💵 {analysis.estimatedCost > 0 ? `Bobcat estimates this fix at ${usd(analysis.estimatedCost)}` : 'Quick fix, no parts needed'}
+          </p>
         )}
         <p className="muted">Facilities can see it on the Feed now.</p>
         <button type="button" className="btn btn-primary" onClick={onViewFeed}>
@@ -221,10 +271,11 @@ export default function Report({ onViewFeed }: ReportProps) {
 
   if (phase === 'analyzing') {
     return (
-      <section className="card">
+      <section className="card report-card">
+        <Stepper phase={phase} />
         {previewUrl && <img className="preview" src={previewUrl} alt="Your photo" />}
         <div className="loading" role="status" aria-live="polite">
-          <span className="paw" aria-hidden="true">🐾</span>
+          <Bobcat mood="curious" lens size={110} className="mascot-bob" />
           Bobcat is looking…
         </div>
       </section>
@@ -233,9 +284,13 @@ export default function Report({ onViewFeed }: ReportProps) {
 
   if (phase === 'error') {
     return (
-      <section className="card">
+      <section className="card report-card">
+        <Stepper phase={phase} />
         {previewUrl && <img className="preview" src={previewUrl} alt="Your photo" />}
-        <div className="error" role="alert">😿 {errorMsg}</div>
+        <div className="hero">
+          <Bobcat mood="sleepy" size={84} />
+          <div className="error" role="alert">{errorMsg}</div>
+        </div>
         <button type="button" className="btn btn-primary" onClick={analyze}>
           Try again
         </button>
@@ -248,12 +303,13 @@ export default function Report({ onViewFeed }: ReportProps) {
 
   if ((phase === 'result' || phase === 'submitting') && analysis) {
     return (
-      <section className="card">
+      <section className="card report-card">
+        <Stepper phase={phase} />
         {previewUrl && <img className="preview" src={previewUrl} alt="Your photo" />}
         <div className="chips">
           <span className="chip chip-category">{CATEGORY_LABELS[analysis.category]}</span>
-          <span className={severityClass(analysis.severity)}>{analysis.severity}</span>
-          <span className="chip chip-category">📍 {building}</span>
+          <span className={severityClass(analysis.severity)}>{analysis.severity} severity</span>
+          <span className="chip chip-category">{building}</span>
         </div>
 
         <div className="field">
@@ -279,13 +335,21 @@ export default function Report({ onViewFeed }: ReportProps) {
         </div>
 
         <p className="feed-impact">📊 Impact: {analysis.impact}</p>
+        <p className="cost-line">
+          💵{' '}
+          {analysis.estimatedCost === null
+            ? 'Repair cost: unknown'
+            : analysis.estimatedCost > 0
+              ? `Estimated repair cost: ${usd(analysis.estimatedCost)}`
+              : 'Quick fix, no parts needed'}
+        </p>
         <p className="muted">🛠️ {analysis.action}</p>
 
         {errorMsg && <div className="error" role="alert">{errorMsg}</div>}
 
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary sticky-cta"
           onClick={submit}
           disabled={phase === 'submitting'}
         >
@@ -300,36 +364,57 @@ export default function Report({ onViewFeed }: ReportProps) {
 
   // idle / picked
   return (
-    <section className="card">
+    <section className={`card report-card ${phase === 'idle' ? 'card-idle card-dark' : ''}`}>
+      <Stepper phase={phase} />
       {phase === 'idle' ? (
-        <>
-          <h2 className="card-title">Spot some waste?</h2>
-          <p className="muted">Snap a photo and Bobcat will write the report for you.</p>
-        </>
+        <div className="hero-stack">
+          <div className="mascot-disc">
+            <Bobcat mood="curious" size={84} />
+          </div>
+          <h2 className="display">Spot something wasteful on campus?</h2>
+          <p className="lede">
+            Snap it. Bobcat writes the facilities report, sizes up the waste, and estimates the fix.
+          </p>
+        </div>
       ) : (
         previewUrl && <img className="preview" src={previewUrl} alt="Your photo" />
       )}
 
       <input
-        ref={inputRef}
-        id="photo"
+        ref={cameraRef}
+        id="photo-camera"
         className="file-input"
         type="file"
         accept="image/*"
         capture="environment"
         onChange={onPick}
       />
+      <input
+        ref={libraryRef}
+        id="photo-library"
+        className="file-input"
+        type="file"
+        accept="image/*"
+        onChange={onPick}
+      />
 
       {phase === 'idle' ? (
         <>
-          <label htmlFor="photo" className="btn btn-primary">
-            📷 Snap a photo
-          </label>
-          <ol className="steps" aria-label="How it works">
-            <li className="step"><span className="step-num">1</span>Snap</li>
-            <li className="step"><span className="step-num">2</span>Bobcat writes the report</li>
-            <li className="step"><span className="step-num">3</span>Submit</li>
-          </ol>
+          <div className="cta-group">
+            <label htmlFor="photo-camera" className="btn btn-light btn-xl">
+              Take a photo
+            </label>
+            <label htmlFor="photo-library" className="btn btn-outline-light">
+              Choose from library
+            </label>
+          </div>
+          <div className="spots" aria-label="What Bobcat can spot">
+            <p className="spots-label">Bobcat spots</p>
+            <span className="spot">💧 Running water</span>
+            <span className="spot">💡 Lights left on</span>
+            <span className="spot">🗑️ Overflowing bins</span>
+            <span className="spot">🔧 Broken fixtures</span>
+          </div>
         </>
       ) : (
         <>
@@ -353,10 +438,10 @@ export default function Report({ onViewFeed }: ReportProps) {
               ))}
             </select>
           </div>
-          <button ref={analyzeRef} type="button" className="btn btn-primary" onClick={analyze}>
+          <button ref={analyzeRef} type="button" className="btn btn-primary sticky-cta" onClick={analyze}>
             🔍 Analyze
           </button>
-          <label htmlFor="photo" className="btn btn-secondary">
+          <label htmlFor="photo-library" className="btn btn-secondary">
             Choose a different photo
           </label>
         </>

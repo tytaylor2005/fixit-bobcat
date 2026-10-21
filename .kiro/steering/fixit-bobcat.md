@@ -29,6 +29,6 @@ A 90-minute codeathon prototype for the GCSU Kiro Codeathon (AWS for Social Good
 
 ## Design direction (UI)
 - Name on screen: **FixIt Bobcat**. Tagline: "See waste. Snap it. Fix it."
-- Palette (updated Oct 21, final sprint — team asked for a fresh green look): forest `#0E3B2C` → `#175A42` header gradient, leaf `#2FB66F` / `#1F9A5A` primary, mint `#E6F6EC`, paper `#F3FAF5` background, alert amber `#D97706`, high red `#C62828`. CSS variables `--navy`/`--gold`/`--offwhite` are aliased onto the green tokens so old rules keep working.
+- Look (final, Oct 21 evening — team asked for a style like directory.goodonyou.eco): editorial. Charcoal `#222` top band and hero card, warm paper `#F5F3F1`, white cards with 1px `#E0DEDC` borders and 8px radius, pill buttons (charcoal / white / outline), system **serif** display type (Iowan Old Style → Palatino → Georgia) for headlines, thin system sans body, uppercase 11px letter-spaced micro labels, photo tiles with a white uppercase tag pill. Accent moss green `#2F6B4F` for success/cost-fixed; severity dots green/amber/red. The bobcat mascot (`src/art.tsx`) adds personality in a cream disc. Still no web fonts, no UI framework.
 - Big tap targets, one primary button per screen, friendly copy, visible loading state ("Bobcat is looking…"), visible empty state on Feed.
 - Font: system UI stack. No web fonts (saves time and a network dependency).

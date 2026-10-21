@@ -3,13 +3,32 @@ import { getCurrentUser, signIn, signOut } from 'aws-amplify/auth';
 import { getStaffClient } from './client';
 import { CATEGORY_LABELS } from './buildings';
 import { Thumb, severityClass, timeAgo, toItem } from './Feed';
+import { Bobcat } from './art';
+import { usd } from './format';
 import type { ReportItem } from './seed';
 
 type AuthState = 'checking' | 'out' | 'in';
 type Filter = 'OPEN' | 'FIXED' | 'ALL';
+type Patch = { status?: 'OPEN' | 'FIXED'; estimatedCost?: number | null; actualCost?: number | null };
 
-const usd = (n: number) =>
-  n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+/** "" → null (clear), "120" → 120, garbage → undefined (invalid, ignore). */
+function parseMoney(raw: string): number | null | undefined {
+  const t = raw.trim();
+  if (t === '') return null;
+  const n = Number(t.replace(/[^0-9.]/g, ''));
+  return Number.isFinite(n) && n >= 0 ? Math.round(n) : undefined;
+}
+
+function DeltaChip({ r }: { r: ReportItem }) {
+  if (r.status !== 'FIXED' || r.estimatedCost === null || r.actualCost === null) return null;
+  const diff = r.actualCost - r.estimatedCost;
+  if (diff === 0) return <span className="chip chip-low">On estimate</span>;
+  return diff < 0 ? (
+    <span className="chip chip-low">{usd(-diff)} under estimate</span>
+  ) : (
+    <span className="chip chip-medium">{usd(diff)} over estimate</span>
+  );
+}
 
 function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
   const [email, setEmail] = useState('');
@@ -35,8 +54,13 @@ function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
 
   return (
     <form className="card" onSubmit={submit}>
-      <h2 className="card-title">Staff sign in</h2>
-      <p className="muted">Facilities and campus staff only.</p>
+      <div className="hero">
+        <Bobcat mood="curious" hat size={96} />
+        <div className="bubble">
+          Staff only past this point.
+          <small>Sign in to triage reports, set costs, and mark things fixed.</small>
+        </div>
+      </div>
       <div className="field">
         <label className="label" htmlFor="email">Email</label>
         <input
@@ -77,6 +101,8 @@ export default function Admin() {
   const [filter, setFilter] = useState<Filter>('OPEN');
   const [busyId, setBusyId] = useState('');
   const [costDraft, setCostDraft] = useState<Record<string, string>>({});
+  const [fixingId, setFixingId] = useState('');
+  const [actualDraft, setActualDraft] = useState('');
 
   useEffect(() => {
     getCurrentUser()
@@ -98,7 +124,7 @@ export default function Admin() {
         if (alive) setReports(items);
       } catch (err) {
         console.error('admin load failed', err);
-        if (alive) setLoadError("Couldn't load reports. Pull to refresh or sign in again.");
+        if (alive) setLoadError("Couldn't load reports. Refresh or sign in again.");
       } finally {
         if (alive) setLoading(false);
       }
@@ -108,26 +134,50 @@ export default function Admin() {
     };
   }, [auth]);
 
-  const patch = async (id: string, changes: { status?: 'OPEN' | 'FIXED'; estimatedCost?: number | null }) => {
+  const patch = async (id: string, changes: Patch): Promise<boolean> => {
     setBusyId(id);
     try {
       const { data, errors } = await getStaffClient().models.Report.update({ id, ...changes });
       if (errors?.length || !data) throw new Error(errors?.[0]?.message ?? 'update failed');
-      setReports((prev) => prev.map((r) => (r.id === id ? { ...r, ...toItem(data) } : r)));
+      setReports((prev) => prev.map((r) => (r.id === id ? toItem(data) : r)));
+      return true;
     } catch (err) {
       console.error('update failed', err);
       alert("Couldn't save that change. Try again.");
+      return false;
     } finally {
       setBusyId('');
     }
   };
 
-  const saveCost = (r: ReportItem) => {
+  const saveCost = async (r: ReportItem) => {
     const raw = costDraft[r.id];
-    const n = raw === undefined ? r.estimatedCost : raw.trim() === '' ? null : Number(raw);
-    if (n !== null && !Number.isFinite(n)) return;
-    void patch(r.id, { estimatedCost: n });
+    if (raw === undefined) return;
+    const n = parseMoney(raw);
+    if (n === undefined) return;
+    const ok = await patch(r.id, r.status === 'FIXED' ? { actualCost: n } : { estimatedCost: n });
+    if (ok) {
+      setCostDraft((d) => {
+        const copy = { ...d };
+        delete copy[r.id];
+        return copy;
+      });
+    }
   };
+
+  const startFix = (r: ReportItem) => {
+    setFixingId(r.id);
+    setActualDraft(r.estimatedCost !== null ? String(r.estimatedCost) : '');
+  };
+
+  const confirmFix = async (r: ReportItem) => {
+    const n = parseMoney(actualDraft);
+    if (n === undefined) return;
+    const ok = await patch(r.id, { status: 'FIXED', actualCost: n });
+    if (ok) setFixingId('');
+  };
+
+  const reopen = (r: ReportItem) => void patch(r.id, { status: 'OPEN' });
 
   const doSignOut = async () => {
     await signOut();
@@ -137,14 +187,14 @@ export default function Admin() {
 
   const openItems = reports.filter((r) => r.status === 'OPEN');
   const fixedItems = reports.filter((r) => r.status === 'FIXED');
-  const openCost = openItems.reduce((s, r) => s + (r.estimatedCost ?? 0), 0);
-  const fixedCost = fixedItems.reduce((s, r) => s + (r.estimatedCost ?? 0), 0);
+  const expectedOpen = openItems.reduce((s, r) => s + (r.estimatedCost ?? 0), 0);
+  const spentFixed = fixedItems.reduce((s, r) => s + (r.actualCost ?? r.estimatedCost ?? 0), 0);
   const visible = filter === 'ALL' ? reports : filter === 'OPEN' ? openItems : fixedItems;
 
   return (
     <div className="app">
-      <header className="header">
-        <div className="container header-inner admin-bar">
+      <header className="topbar">
+        <div className="container topbar-inner">
           <div className="brand">
             <span className="brand-emoji" aria-hidden="true">🛠️</span>
             <div>
@@ -152,20 +202,21 @@ export default function Admin() {
               <p className="brand-tagline">Staff console</p>
             </div>
           </div>
-          {auth === 'in' ? (
-            <button type="button" className="btn btn-ghost btn-small" onClick={doSignOut}>
-              Sign out
-            </button>
-          ) : (
-            <a className="link link-light" href="#">← Student app</a>
-          )}
+          <nav className="topbar-nav" aria-label="Site">
+            <a className="topbar-link" href="#">Student app</a>
+            {auth === 'in' && (
+              <button type="button" className="btn btn-light btn-small" onClick={doSignOut}>
+                Sign out
+              </button>
+            )}
+          </nav>
         </div>
       </header>
 
       <main className="container content">
         {auth === 'checking' && (
           <div className="loading" role="status">
-            <span className="paw" aria-hidden="true">🐾</span>
+            <Bobcat mood="curious" lens size={100} className="mascot-bob" />
             Checking sign-in…
           </div>
         )}
@@ -180,12 +231,12 @@ export default function Admin() {
                 <span className="stat-label">Open</span>
               </div>
               <div className="stat">
-                <span className="stat-value">{usd(openCost)}</span>
-                <span className="stat-label">Expected cost (open)</span>
+                <span className="stat-value">{usd(expectedOpen)}</span>
+                <span className="stat-label">Expected (open)</span>
               </div>
               <div className="stat">
-                <span className="stat-value">{usd(fixedCost)}</span>
-                <span className="stat-label">Spent on fixed</span>
+                <span className="stat-value">{usd(spentFixed)}</span>
+                <span className="stat-label">Spent (fixed)</span>
               </div>
             </div>
 
@@ -199,14 +250,18 @@ export default function Admin() {
                   className={`filter ${filter === f ? 'filter-active' : ''}`}
                   onClick={() => setFilter(f)}
                 >
-                  {f === 'OPEN' ? `Open (${openItems.length})` : f === 'FIXED' ? `Fixed (${fixedItems.length})` : `All (${reports.length})`}
+                  {f === 'OPEN'
+                    ? `Open (${openItems.length})`
+                    : f === 'FIXED'
+                      ? `Fixed (${fixedItems.length})`
+                      : `All (${reports.length})`}
                 </button>
               ))}
             </div>
 
             {loading && (
               <div className="loading" role="status">
-                <span className="paw" aria-hidden="true">🐾</span>
+                <Bobcat mood="curious" lens size={100} className="mascot-bob" />
                 Fetching reports…
               </div>
             )}
@@ -214,25 +269,29 @@ export default function Admin() {
 
             {!loading && !loadError && visible.length === 0 && (
               <section className="empty">
-                <div className="empty-emoji" aria-hidden="true">🎉</div>
+                <Bobcat mood={filter === 'OPEN' ? 'happy' : 'sleepy'} size={92} />
                 <p className="empty-text">
                   {filter === 'OPEN' ? 'Nothing open. Nice work.' : 'Nothing here yet.'}
                 </p>
               </section>
             )}
 
+            <div className="cards-grid">
             {visible.map((r) => (
-              <article key={r.id} className="card feed-card">
-                <Thumb photoKey={r.photoKey} category={r.category} />
+              <article key={r.id} className="card feed-card feed-card-static">
+                <div className="tile">
+                  <Thumb photoKey={r.photoKey} category={r.category} />
+                  <span className="tile-tag">{CATEGORY_LABELS[r.category]}</span>
+                  {r.status === 'FIXED' && <span className="tile-tag tile-tag-fixed">✓ Fixed</span>}
+                </div>
                 <div className="feed-body">
                   <h3 className="feed-title">{r.title}</h3>
                   <p className="feed-meta">
-                    📍 {r.building} · {timeAgo(r.createdAt)}
+                    {r.building} · {timeAgo(r.createdAt)}
                   </p>
                   <div className="chips">
-                    <span className="chip chip-category">{CATEGORY_LABELS[r.category]}</span>
-                    <span className={severityClass(r.severity)}>{r.severity}</span>
-                    {r.status === 'FIXED' && <span className="chip chip-fixed">✓ Fixed</span>}
+                    <span className={severityClass(r.severity)}>{r.severity} severity</span>
+                    <DeltaChip r={r} />
                   </div>
                 </div>
 
@@ -241,8 +300,18 @@ export default function Admin() {
                   <p className="feed-impact">📊 {r.impact}</p>
                   {r.action && <p className="muted">🛠️ {r.action}</p>}
 
+                  {r.status === 'FIXED' && (
+                    <div className="cost-compare">
+                      <span>Estimated {r.estimatedCost === null ? '—' : usd(r.estimatedCost)}</span>
+                      <span className="arrow" aria-hidden="true">→</span>
+                      <span>Actual {r.actualCost === null ? '—' : usd(r.actualCost)}</span>
+                    </div>
+                  )}
+
                   <div className="cost-row">
-                    <label className="label" htmlFor={`cost-${r.id}`}>Expected cost ($)</label>
+                    <label className="label" htmlFor={`cost-${r.id}`}>
+                      {r.status === 'FIXED' ? 'Actual cost ($)' : 'Expected cost ($)'}
+                    </label>
                     <div className="cost-controls">
                       <input
                         id={`cost-${r.id}`}
@@ -252,14 +321,14 @@ export default function Admin() {
                         min={0}
                         step={1}
                         placeholder="0"
-                        value={costDraft[r.id] ?? (r.estimatedCost ?? '')}
+                        value={costDraft[r.id] ?? ((r.status === 'FIXED' ? r.actualCost : r.estimatedCost) ?? '')}
                         onChange={(e) => setCostDraft((d) => ({ ...d, [r.id]: e.target.value }))}
                       />
                       <button
                         type="button"
                         className="btn btn-secondary btn-small"
                         onClick={() => saveCost(r)}
-                        disabled={busyId === r.id}
+                        disabled={busyId === r.id || costDraft[r.id] === undefined}
                       >
                         Save
                       </button>
@@ -267,19 +336,54 @@ export default function Admin() {
                   </div>
 
                   {r.status === 'OPEN' ? (
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => patch(r.id, { status: 'FIXED' })}
-                      disabled={busyId === r.id}
-                    >
-                      {busyId === r.id ? 'Saving…' : '✓ Mark fixed'}
-                    </button>
+                    fixingId === r.id ? (
+                      <div className="fix-panel">
+                        <label className="label" htmlFor={`actual-${r.id}`}>What did it actually cost? ($)</label>
+                        <input
+                          id={`actual-${r.id}`}
+                          className="input"
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          step={1}
+                          placeholder="0"
+                          value={actualDraft}
+                          onChange={(e) => setActualDraft(e.target.value)}
+                        />
+                        <div className="row-2">
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => setFixingId('')}
+                            disabled={busyId === r.id}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={() => confirmFix(r)}
+                            disabled={busyId === r.id}
+                          >
+                            {busyId === r.id ? 'Saving…' : '✓ Confirm fixed'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => startFix(r)}
+                        disabled={busyId === r.id}
+                      >
+                        ✓ Mark fixed
+                      </button>
+                    )
                   ) : (
                     <button
                       type="button"
                       className="btn btn-secondary"
-                      onClick={() => patch(r.id, { status: 'OPEN' })}
+                      onClick={() => reopen(r)}
                       disabled={busyId === r.id}
                     >
                       {busyId === r.id ? 'Saving…' : 'Reopen'}
@@ -288,6 +392,7 @@ export default function Admin() {
                 </div>
               </article>
             ))}
+            </div>
           </>
         )}
       </main>

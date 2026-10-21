@@ -15,6 +15,7 @@ const schema = a.schema({
       action: a.string(),
       status: a.enum(['OPEN', 'FIXED']),
       estimatedCost: a.float(), // expected repair cost in USD (AI-suggested, staff-editable)
+      actualCost: a.float(), // what the fix really cost, entered by staff when marking fixed
     })
     .authorization((allow) => [
       // Students (no account): report and browse.

@@ -73,3 +73,12 @@ Acceptance criteria:
 1. Root URL is the student page: snap → "Bobcat is looking…" → review → submit, three taps.
 2. The building picker remembers the last choice on this device.
 3. A small "Staff sign in" link in the footer leads to the staff console.
+
+### US-7: Costs, estimated and actual (added in the final hour)
+1. WHEN analysis completes THEN the result card shows Bobcat's estimated repair cost in dollars (or "Quick fix, no parts needed" when the fix is free), and the confirmation screen repeats it.
+2. Feed cards show the estimate while a report is open, and "Fixed for $X · est. $Y" once fixed.
+3. WHEN staff tap Mark fixed THEN they are asked what the fix actually cost (pre-filled with the estimate) before the status changes. Fixed reports show estimated → actual with an under/over-estimate chip, and the actual cost stays editable.
+4. Staff tiles: Open count, Expected cost of open issues, Spent on fixed issues (actual, falling back to the estimate).
+
+### US-8: Personality
+A hand-drawn inline-SVG bobcat mascot appears on the student hero, loading, success, error and empty states, and wears a hard hat on the staff sign-in. A faint paw-print pattern sits behind the page.

@@ -41,3 +41,5 @@ Target times are from the start of the build clock. Driver: check each box only 
 - [x] 15. Backend: `estimatedCost` on Report + AnalysisResult; public key = create/read only, authenticated = read/update/delete; authenticated storage read; Lambda prompt asks for a USD repair estimate.
 - [x] 16. Frontend: hash route `#admin` → `Admin.tsx` (Cognito sign-in, filters, cost tiles, expected-cost editor, Mark fixed / Reopen). Public Feed becomes view-only. Student page remembers the building and links to staff sign-in.
 - [x] 17. Create a staff demo user in the Cognito pool (login kept in git-ignored `STAFF-LOGIN.local.md`), verify student + staff flows in the browser, update README.
+- [x] 18. Costs: `actualCost` on the Report model; estimate shown on the student result + confirmation and on feed cards; staff "Mark fixed" asks for the actual cost; estimated → actual comparison and tiles in the staff console.
+- [x] 19. Personality: inline-SVG bobcat mascot (moods + hard hat + magnifying glass) across student and staff states, speech-bubble hero, "Bobcat spots" row, paw-print background.

@@ -14,6 +14,7 @@ export interface ReportItem {
   action: string;
   status: Status;
   estimatedCost: number | null;
+  actualCost: number | null;
   createdAt: string;
 }
 
@@ -23,6 +24,7 @@ const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString(
 export const SEED_REPORTS: ReportItem[] = [
   {
     id: 'seed-1',
+    actualCost: null,
     estimatedCost: 120,
     photoKey: 'seed/beeson-faucet.jpg',
     building: 'Beeson Hall',
@@ -39,6 +41,7 @@ export const SEED_REPORTS: ReportItem[] = [
   },
   {
     id: 'seed-2',
+    actualCost: null,
     estimatedCost: 0,
     photoKey: 'seed/arts-sciences-lights.jpg',
     building: 'Arts & Sciences',
@@ -55,6 +58,7 @@ export const SEED_REPORTS: ReportItem[] = [
   },
   {
     id: 'seed-3',
+    actualCost: null,
     estimatedCost: 25,
     photoKey: 'seed/library-recycling.jpg',
     building: 'Ina Dillard Russell Library',
@@ -71,6 +75,7 @@ export const SEED_REPORTS: ReportItem[] = [
   },
   {
     id: 'seed-4',
+    actualCost: 410,
     estimatedCost: 350,
     photoKey: 'seed/wells-fountain.jpg',
     building: 'Wells Hall',
@@ -87,6 +92,7 @@ export const SEED_REPORTS: ReportItem[] = [
   },
   {
     id: 'seed-5',
+    actualCost: 45,
     estimatedCost: 60,
     photoKey: 'seed/wellness-doors.jpg',
     building: 'Wellness & Recreation Center',
