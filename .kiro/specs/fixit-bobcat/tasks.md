@@ -6,7 +6,7 @@ Target times are from the start of the build clock. Driver: check each box only 
 
 - [x] 1. Scaffold the app. `npm create vite@latest . -- --template react-ts`, then `npm create amplify@latest` (accept defaults), `npm install aws-amplify @aws-sdk/client-bedrock-runtime @aws-sdk/client-s3`. Delete the generated `amplify/auth` folder and remove `auth` from `backend.ts` — we do not want auth.
 - [x] 2. Create `src/buildings.ts` (building list + category list from requirements.md) and `src/seed.ts` (5 realistic seed reports: running faucet in Beeson Hall, lights on in an empty Arts & Sciences classroom, overflowing recycling outside the Library, broken water fountain in Wells Hall, AC running with doors propped open at the Wellness Center — each with impact string, impactScore, severity, status, and a placeholder photo path).
-- [ ] 3. Build `App.tsx` with header, tab bar, and empty `Report` / `Feed` components. Write `styles.css` with the palette and the container/card/chip/button classes from design.md. Verify at 375 px width.
+- [x] 3. Build `App.tsx` with header, tab bar, and empty `Report` / `Feed` components. Write `styles.css` with the palette and the container/card/chip/button classes from design.md. Verify at 375 px width.
 
 ## Phase 2 — Backend (target: done by minute 35)
 
