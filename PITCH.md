@@ -77,7 +77,7 @@ Students get a reason to notice. Campus wastes less.
 
 **Original**: nobody asked students to write a work order. The AI writes it. The student just points.
 
-**Design**: one button per screen, Bobcat colors, built for a phone.
+**Design**: one button per screen, big tap targets, built for a phone.
 
 See waste. Snap it. Fix it. Thank you.
 

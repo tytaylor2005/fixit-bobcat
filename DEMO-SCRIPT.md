@@ -22,7 +22,7 @@ Click-by-click. One person drives the laptop, one holds the phone. Total demo ti
 
 | # | Tap | What you see | Say |
 |---|---|---|---|
-| 1 | Open the LAN URL on the phone | Navy header, "FixIt Bobcat. See waste. Snap it. Fix it." Report tab active. One big gold button. | "I'm a student. One button." |
+| 1 | Open the LAN URL on the phone | Green header, "FixIt Bobcat. See waste. Snap it. Fix it." Report tab active. One big green button. | "I'm a student. One button." |
 | 2 | **📷 Snap a photo** | Camera opens (or the picker). Take or choose the photo. | "I take the picture." |
 | 3 | Pick the building in the dropdown (it remembers the last choice) | Photo preview, building selected, **🔍 Analyze** button. | "I pick the building." |
 | 4 | **🔍 Analyze** | Pulsing 🐾 and "Bobcat is looking…". Usually about one second on Nova Lite. | "Bobcat is looking…" |
