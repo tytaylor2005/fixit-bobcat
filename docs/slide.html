@@ -23,7 +23,7 @@
     width: 1280px; height: 720px;
     background: var(--paper);
     display: grid;
-    grid-template-rows: 150px 1fr 120px;
+    grid-template-rows: 150px 58px 1fr 112px;
     overflow: hidden;
     position: relative;
   }
@@ -37,24 +37,38 @@
     padding: 0 64px;
   }
   .mark {
-    width: 92px; height: 92px; border-radius: 24px;
-    background: var(--gold); color: var(--navy);
+    width: 96px; height: 96px; border-radius: 26px;
+    background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.14);
     display: grid; place-items: center;
-    font-size: 54px; line-height: 1;
-    box-shadow: 0 6px 0 rgba(0,0,0,.25);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
   }
-  h1 { font-size: 60px; letter-spacing: -1px; color: var(--gold); line-height: 1; }
+  .mark svg { width: 70px; height: 70px; }
+  h1 { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-weight: 400; font-size: 62px; letter-spacing: -1px; color: #fff; line-height: 1; }
   .tagline { font-size: 28px; margin-top: 8px; color: rgba(243,250,245,.95); }
   .track { margin-left: auto; text-align: right; font-size: 18px; color: rgba(191,233,208,.9); line-height: 1.4; }
 
+  .links {
+    display: flex; align-items: center; gap: 12px; padding: 0 64px;
+    background: #fff; border-bottom: 1px solid rgba(14,59,44,.12);
+  }
+  .links .label { font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); font-weight: 700; white-space: nowrap; }
+  .links a {
+    display: inline-flex; align-items: center; gap: 8px;
+    text-decoration: none; color: var(--navy);
+    border: 1px solid rgba(14,59,44,.25); border-radius: 999px;
+    padding: 6px 13px; font-size: 15px; font-weight: 600; white-space: nowrap;
+  }
+  .links a .k { font-weight: 400; color: var(--muted); }
+  .links a .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+
   main {
-    padding: 24px 64px 0;
+    padding: 22px 64px 0;
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; align-items: center;
   }
   .step {
     background: #fff; border-radius: 20px; padding: 28px 28px 24px;
     box-shadow: 0 8px 24px rgba(14,59,44,.08);
-    min-height: 300px;
+    min-height: 280px;
     position: relative;
   }
   .step .num {
@@ -93,6 +107,13 @@
     </div>
     <div class="track">GCSU Kiro Codeathon · Oct 21 2026<br>Environment &amp; Sustainability</div>
   </header>
+
+  <nav class="links" aria-label="Links">
+    <span class="label">Try it</span>
+    <a href="https://main.d33opwqrk6se62.amplifyapp.com/"><span class="dot"></span><span class="k">Live app</span> main.d33opwqrk6se62.amplifyapp.com</a>
+    <a href="https://main.d33opwqrk6se62.amplifyapp.com/#admin"><span class="dot"></span><span class="k">Staff console</span> …/#admin</a>
+    <a href="https://github.com/tytaylor2005/fixit-bobcat"><span class="dot"></span><span class="k">Code</span> github.com/tytaylor2005/fixit-bobcat</a>
+  </nav>
 
   <main>
     <div class="step">
