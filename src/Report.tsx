@@ -4,6 +4,7 @@ import { getClient } from './client';
 import { BUILDINGS, CATEGORY_LABELS, type Category, type Severity } from './buildings';
 import { Bobcat, BrandMark } from './art';
 import { usd } from './format';
+import { CHEERS, TIPS, pick } from './personality';
 
 type Phase = 'idle' | 'picked' | 'analyzing' | 'result' | 'submitting' | 'done' | 'error';
 
@@ -122,6 +123,8 @@ export default function Report({ onViewFeed }: ReportProps) {
   const analyzeRef = useRef<HTMLButtonElement>(null);
   const startedAtRef = useRef<number | null>(null);
   const [elapsedSec, setElapsedSec] = useState<number | null>(null);
+  const [tip] = useState(() => pick(TIPS));
+  const [cheer] = useState(() => pick(CHEERS));
 
   // Once a photo is picked, bring the primary action into view on small screens.
   useEffect(() => {
@@ -246,6 +249,7 @@ export default function Report({ onViewFeed }: ReportProps) {
           <Bobcat mood="happy" size={104} />
         </div>
         <div className="success">✅ Reported. Thanks, Bobcat.</div>
+        <p className="cheer">{cheer}</p>
         {elapsedSec !== null && (
           <p className="muted reported-in">⏱️ Reported in {elapsedSec} second{elapsedSec === 1 ? '' : 's'}</p>
         )}
@@ -372,6 +376,7 @@ export default function Report({ onViewFeed }: ReportProps) {
           <p className="lede">
             Snap it. Bobcat writes the facilities report, sizes up the waste, and estimates the fix.
           </p>
+          <p className="tip"><span className="tip-k">Bobcat fact</span>{tip}</p>
         </div>
       ) : (
         previewUrl && <img className="preview" src={previewUrl} alt="Your photo" />

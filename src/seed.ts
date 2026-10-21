@@ -16,6 +16,7 @@ export interface ReportItem {
   estimatedCost: number | null;
   actualCost: number | null;
   createdAt: string;
+  updatedAt?: string;
 }
 
 const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString();

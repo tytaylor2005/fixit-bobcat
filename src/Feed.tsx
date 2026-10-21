@@ -47,6 +47,7 @@ export function toItem(r: {
   estimatedCost?: number | null;
   actualCost?: number | null;
   createdAt: string;
+  updatedAt?: string | null;
 }): ReportItem {
   return {
     id: r.id,
@@ -63,6 +64,7 @@ export function toItem(r: {
     estimatedCost: r.estimatedCost ?? null,
     actualCost: r.actualCost ?? null,
     createdAt: r.createdAt,
+    updatedAt: r.updatedAt ?? undefined,
   };
 }
 
@@ -181,7 +183,7 @@ export default function Feed() {
             >
               <div className="tile">
                 <Thumb photoKey={r.photoKey} category={r.category} />
-                <span className="tile-tag">{CATEGORY_LABELS[r.category]}</span>
+                <span className={`tile-tag cat-${r.category.toLowerCase()}`}>{CATEGORY_LABELS[r.category]}</span>
                 {r.status === 'FIXED' && <span className="tile-tag tile-tag-fixed">✓ Fixed</span>}
               </div>
               <div className="feed-body">

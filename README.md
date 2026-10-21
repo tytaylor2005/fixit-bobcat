@@ -69,7 +69,7 @@ npm run dev -- --host   # to open it from a phone on the same Wi-Fi
 
 ## Staff console (private)
 
-Open `/#admin` (for example http://localhost:5173/#admin). Staff sign in with a Cognito email + password; students never see a login. Staff can filter Open / Fixed / All, set the **expected cost** of each fix (pre-filled by the AI), and mark issues fixed. Marking fixed asks for the **actual cost**; fixed reports then show estimated → actual with an under/over-estimate chip, and the public Feed shows "Fixed for $X · est. $Y". The public API key can only create and read reports, so nothing on the student side can change a record.
+Open `/#admin` (for example http://localhost:5173/#admin). Staff sign in with a Cognito email + password; students never see a login. Staff can filter Open / Fixed / All, set the **expected cost** of each fix (pre-filled by the AI), and mark issues fixed. Marking fixed asks for the **actual cost**; fixed reports then show estimated → actual with an under/over-estimate chip, and the public Feed shows "Fixed for $X · est. $Y". The console opens with a KPI row and a **Campus analytics** panel (reports by category, severity mix, top buildings, last 7 days, resolution rate) with a table view and CSV export. The public API key can only create and read reports, so nothing on the student side can change a record.
 
 The demo staff login is in `STAFF-LOGIN.local.md` on the driver's laptop (git-ignored). That file also has the two CLI commands to add more staff accounts.
 

@@ -4,6 +4,7 @@ import { getStaffClient } from './client';
 import { CATEGORY_LABELS } from './buildings';
 import { Thumb, severityClass, timeAgo, toItem } from './Feed';
 import { Bobcat, BrandMark } from './art';
+import Analytics from './Analytics';
 import { usd } from './format';
 import type { ReportItem } from './seed';
 
@@ -189,8 +190,6 @@ export default function Admin() {
 
   const openItems = reports.filter((r) => r.status === 'OPEN');
   const fixedItems = reports.filter((r) => r.status === 'FIXED');
-  const expectedOpen = openItems.reduce((s, r) => s + (r.estimatedCost ?? 0), 0);
-  const spentFixed = fixedItems.reduce((s, r) => s + (r.actualCost ?? r.estimatedCost ?? 0), 0);
   const visible = filter === 'ALL' ? reports : filter === 'OPEN' ? openItems : fixedItems;
 
   return (
@@ -227,20 +226,7 @@ export default function Admin() {
 
         {auth === 'in' && (
           <>
-            <div className="stats" aria-label="Facilities stats">
-              <div className="stat">
-                <span className="stat-value">{openItems.length}</span>
-                <span className="stat-label">Open</span>
-              </div>
-              <div className="stat">
-                <span className="stat-value">{usd(expectedOpen)}</span>
-                <span className="stat-label">Expected (open)</span>
-              </div>
-              <div className="stat">
-                <span className="stat-value">{usd(spentFixed)}</span>
-                <span className="stat-label">Spent (fixed)</span>
-              </div>
-            </div>
+            <Analytics reports={reports} />
 
             <div className="filters" role="tablist" aria-label="Filter reports">
               {(['OPEN', 'FIXED', 'ALL'] as Filter[]).map((f) => (
@@ -284,7 +270,7 @@ export default function Admin() {
               <article key={r.id} className="card feed-card feed-card-static">
                 <div className="tile">
                   <Thumb photoKey={r.photoKey} category={r.category} />
-                  <span className="tile-tag">{CATEGORY_LABELS[r.category]}</span>
+                  <span className={`tile-tag cat-${r.category.toLowerCase()}`}>{CATEGORY_LABELS[r.category]}</span>
                   {r.status === 'FIXED' && <span className="tile-tag tile-tag-fixed">✓ Fixed</span>}
                 </div>
                 <div className="feed-body">

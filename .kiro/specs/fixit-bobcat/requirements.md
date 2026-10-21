@@ -82,3 +82,11 @@ Acceptance criteria:
 
 ### US-8: Personality
 A hand-drawn inline-SVG bobcat mascot appears on the student hero, loading, success, error and empty states, and wears a hard hat on the staff sign-in. A faint paw-print pattern sits behind the page.
+
+### US-9: Staff analytics
+1. The staff console opens with a KPI row: open issues, fixed (with % resolved), median time to fix, expected cost of open issues, spent on fixes (with % vs estimate), impact avoided (with impact still open).
+2. A collapsible "Campus analytics" panel shows reports by category (open vs fixed, one-hue ramp validated for color-vision safety), severity mix of open issues, top buildings, new reports per day for the last 7 days, and a resolution-rate meter. Every chart has a table view and a CSV export.
+3. Charts are plain HTML/CSS (no chart library), with hover titles and direct labels.
+
+### US-10: Personality
+The student hero shows a rotating "Bobcat fact"; the confirmation screen adds a rotating thank-you line; feed category tags are tinted by category; a faint paw-print pattern sits behind the page.
