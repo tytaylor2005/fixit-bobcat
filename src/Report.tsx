@@ -272,7 +272,7 @@ export default function Report({ onViewFeed }: ReportProps) {
           <p className="muted">Snap a photo and Bobcat will write the report for you.</p>
         </>
       ) : (
-        <img className="preview" src={previewUrl} alt="Your photo" />
+        previewUrl && <img className="preview" src={previewUrl} alt="Your photo" />
       )}
 
       <input
