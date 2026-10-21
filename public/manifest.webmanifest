@@ -4,8 +4,8 @@
   "description": "See waste. Snap it. Fix it.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F5F3F1",
-  "theme_color": "#222222",
+  "background_color": "#F3F7F4",
+  "theme_color": "#0F3D2E",
   "icons": [
     {
       "src": "/favicon.svg",

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { uploadData } from 'aws-amplify/storage';
 import { getClient } from './client';
 import { BUILDINGS, CATEGORY_LABELS, type Category, type Severity } from './buildings';
-import { Bobcat } from './art';
+import { Bobcat, BrandMark } from './art';
 import { usd } from './format';
 
 type Phase = 'idle' | 'picked' | 'analyzing' | 'result' | 'submitting' | 'done' | 'error';
@@ -361,6 +361,7 @@ export default function Report({ onViewFeed }: ReportProps) {
   // idle / picked
   return (
     <section className={`card report-card ${phase === 'idle' ? 'card-idle card-dark' : ''}`}>
+      {phase === 'idle' && <BrandMark className="hero-watermark" tone="white" size={260} />}
       <Stepper phase={phase} />
       {phase === 'idle' ? (
         <div className="hero-stack">

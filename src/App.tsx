@@ -3,6 +3,7 @@ import Report from './Report';
 import Feed from './Feed';
 import Admin from './Admin';
 import HowItWorks from './HowItWorks';
+import { BrandMark } from './art';
 
 export type Tab = 'report' | 'feed';
 
@@ -61,28 +62,7 @@ export default function App() {
       <header className="topbar">
         <div className="container topbar-inner">
           <div className="brand">
-            <svg
-              className="brand-mark"
-              viewBox="0 0 64 64"
-              width="36"
-              height="36"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <g fill="var(--gold)">
-                <g transform="rotate(45 32 32)">
-                  <path d="M28 5.75 L28 17 L36 17 L36 5.75 A11 11 0 1 1 28 5.75 Z" />
-                  <rect x="28" y="20" width="8" height="36" rx="4" />
-                </g>
-                <g stroke="var(--navy)" strokeWidth="2">
-                  <ellipse cx="40" cy="46" rx="8.5" ry="6.5" />
-                  <circle cx="30.5" cy="38.5" r="3.6" />
-                  <circle cx="37.5" cy="34.5" r="3.6" />
-                  <circle cx="45" cy="35.5" r="3.6" />
-                  <circle cx="50.5" cy="40.5" r="3.6" />
-                </g>
-              </g>
-            </svg>
+            <BrandMark size={38} tone="light" />
             <div>
               <h1 className="brand-title">FixIt Bobcat</h1>
               <p className="brand-tagline">See waste. Snap it. Fix it.</p>
@@ -137,9 +117,16 @@ export default function App() {
       )}
 
       <footer className="container footer">
-        <a className="link" href="#how">How it works</a>
-        <span className="footer-dot" aria-hidden="true">·</span>
-        <a className="link" href="#admin">Staff sign in</a>
+        <div className="footer-brand">
+          <BrandMark size={28} tone="dark" />
+          <span className="footer-wordmark">FixIt Bobcat</span>
+          <span className="footer-sub">Georgia College &amp; State University</span>
+        </div>
+        <div>
+          <a className="link" href="#how">How it works</a>
+          <span className="footer-dot" aria-hidden="true">·</span>
+          <a className="link" href="#admin">Staff sign in</a>
+        </div>
       </footer>
     </div>
   );

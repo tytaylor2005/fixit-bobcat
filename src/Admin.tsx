@@ -3,7 +3,7 @@ import { getCurrentUser, signIn, signOut } from 'aws-amplify/auth';
 import { getStaffClient } from './client';
 import { CATEGORY_LABELS } from './buildings';
 import { Thumb, severityClass, timeAgo, toItem } from './Feed';
-import { Bobcat } from './art';
+import { Bobcat, BrandMark } from './art';
 import { usd } from './format';
 import type { ReportItem } from './seed';
 
@@ -198,14 +198,14 @@ export default function Admin() {
       <header className="topbar">
         <div className="container topbar-inner">
           <div className="brand">
-            <span className="brand-emoji" aria-hidden="true">🛠️</span>
+            <BrandMark size={38} tone="light" />
             <div>
               <h1 className="brand-title">FixIt Bobcat</h1>
               <p className="brand-tagline">Staff console</p>
             </div>
           </div>
           <nav className="topbar-nav" aria-label="Site">
-            <a className="topbar-link" href="#">Student app</a>
+            <a className={`topbar-link ${auth === 'in' ? 'hide-sm' : ''}`} href="#">Student app</a>
             {auth === 'in' && (
               <button type="button" className="btn btn-light btn-small" onClick={doSignOut}>
                 Sign out
@@ -401,7 +401,14 @@ export default function Admin() {
       </main>
 
       <footer className="container footer">
-        <a className="link" href="#">← Back to student app</a>
+        <div className="footer-brand">
+          <BrandMark size={28} tone="dark" />
+          <span className="footer-wordmark">FixIt Bobcat</span>
+          <span className="footer-sub">Staff console</span>
+        </div>
+        <div>
+          <a className="link" href="#">← Back to student app</a>
+        </div>
       </footer>
     </div>
   );

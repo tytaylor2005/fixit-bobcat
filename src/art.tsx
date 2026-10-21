@@ -131,3 +131,43 @@ export function Bobcat({ mood = 'curious', hat = false, lens = false, size = 120
     </svg>
   );
 }
+
+/**
+ * BrandMark — the FixIt Bobcat logo: a paw print over a hammer.
+ * tone "light" = leaf-green mark for dark backgrounds, "dark" = forest mark for paper.
+ */
+interface BrandMarkProps {
+  size?: number;
+  tone?: 'light' | 'dark' | 'white';
+  className?: string;
+}
+
+export function BrandMark({ size = 36, tone = 'light', className }: BrandMarkProps) {
+  const fill = tone === 'light' ? '#2fb66f' : tone === 'white' ? '#ffffff' : '#0f3d2e';
+  const cut = tone === 'dark' ? '#f3f7f4' : '#0f3d2e';
+  return (
+    <svg
+      className={['brand-mark', className].filter(Boolean).join(' ')}
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g fill={fill} transform="rotate(45 32 32)">
+        {/* hammer: handle + head */}
+        <rect x="28.5" y="19" width="7" height="39" rx="3.5" />
+        <rect x="18" y="6" width="28" height="13" rx="3.5" />
+        <rect x="18" y="6" width="9" height="13" rx="3.5" opacity="0.55" />
+      </g>
+      <g fill={fill} stroke={cut} strokeWidth="2.2">
+        {/* paw print */}
+        <ellipse cx="41" cy="46" rx="8.5" ry="6.5" />
+        <circle cx="31.5" cy="38.5" r="3.7" />
+        <circle cx="38.5" cy="34" r="3.7" />
+        <circle cx="46" cy="35" r="3.7" />
+        <circle cx="51.5" cy="40.5" r="3.7" />
+      </g>
+    </svg>
+  );
+}
