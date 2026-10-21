@@ -30,3 +30,5 @@ amplifyconfiguration*
 
 # local secrets (staff demo login etc.)
 *.local.md
+site.zip
+dist

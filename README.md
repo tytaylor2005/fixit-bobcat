@@ -1,5 +1,7 @@
 # FixIt Bobcat 🐾
 
+**Live site:** https://main.d33opwqrk6se62.amplifyapp.com  ·  staff console: https://main.d33opwqrk6se62.amplifyapp.com/#admin  ·  slide: https://main.d33opwqrk6se62.amplifyapp.com/docs/slide.html
+
 **See waste. Snap it. Fix it.** — GCSU Kiro Codeathon, Oct 21 2026 (Environment & Sustainability track).
 
 A student snaps a photo of waste on campus; FixIt Bobcat identifies the problem with Amazon Bedrock, writes the facilities report, estimates the impact, and logs it to a public feed.
@@ -70,6 +72,10 @@ npm run dev -- --host   # to open it from a phone on the same Wi-Fi
 Open `/#admin` (for example http://localhost:5173/#admin). Staff sign in with a Cognito email + password; students never see a login. Staff can filter Open / Fixed / All, set the **expected cost** of each fix (pre-filled by the AI), and mark issues fixed or reopen them. The public API key can only create and read reports, so nothing on the student side can change a record.
 
 The demo staff login is in `STAFF-LOGIN.local.md` on the driver's laptop (git-ignored). That file also has the two CLI commands to add more staff accounts.
+
+## Deploying the site
+
+`bash scripts/deploy-hosting.sh` builds the frontend and publishes it to Amplify Hosting as a manual zip deployment (no GitHub connection needed). The hosted site uses the same sandbox backend, so keep `npx ampx sandbox` running on the driver's laptop during the demo.
 
 ## Demo fallback
 
