@@ -88,6 +88,8 @@ export function Thumb({ photoKey, category }: { photoKey: string; category: Cate
 export default function Feed() {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const toggle = (id: string) => setOpenId((cur) => (cur === id ? null : id));
 
   useEffect(() => {
     let alive = true;
@@ -146,23 +148,53 @@ export default function Feed() {
           <p className="empty-text">Nothing reported yet. Be the first.</p>
         </section>
       ) : (
-        reports.map((r) => (
-          <article key={r.id} className="card feed-card">
-            <Thumb photoKey={r.photoKey} category={r.category} />
-            <div className="feed-body">
-              <h3 className="feed-title">{r.title}</h3>
-              <p className="feed-meta">
-                📍 {r.building} · {timeAgo(r.createdAt)}
-              </p>
-              <div className="chips">
-                <span className="chip chip-category">{CATEGORY_LABELS[r.category]}</span>
-                <span className={severityClass(r.severity)}>{r.severity}</span>
-                {r.status === 'FIXED' && <span className="chip chip-fixed">✓ Fixed</span>}
+        reports.map((r) => {
+          const expanded = openId === r.id;
+          const detailId = `feed-detail-${r.id}`;
+          return (
+            <article
+              key={r.id}
+              className={`card feed-card ${expanded ? 'feed-card-open' : ''}`}
+              onClick={() => toggle(r.id)}
+            >
+              <Thumb photoKey={r.photoKey} category={r.category} />
+              <div className="feed-body">
+                <div className="feed-head">
+                  <h3 className="feed-title">{r.title}</h3>
+                  <button
+                    type="button"
+                    className="chevron"
+                    aria-expanded={expanded}
+                    aria-controls={detailId}
+                    aria-label={expanded ? 'Hide details' : 'Show details'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggle(r.id);
+                    }}
+                  >
+                    <span className="chevron-icon" aria-hidden="true">⌄</span>
+                  </button>
+                </div>
+                <p className="feed-meta">
+                  📍 {r.building} · {timeAgo(r.createdAt)}
+                </p>
+                <div className="chips">
+                  <span className="chip chip-category">{CATEGORY_LABELS[r.category]}</span>
+                  <span className={severityClass(r.severity)}>{r.severity}</span>
+                  {r.status === 'FIXED' && <span className="chip chip-fixed">✓ Fixed</span>}
+                </div>
+                <p className="feed-impact">📊 {r.impact}</p>
               </div>
-              <p className="feed-impact">📊 {r.impact}</p>
-            </div>
-          </article>
-        ))
+              {expanded && (
+                <div id={detailId} className="feed-detail">
+                  {r.description && <p className="card-desc">{r.description}</p>}
+                  {r.action && <p className="muted">🛠️ {r.action}</p>}
+                  {!r.description && !r.action && <p className="muted">No extra details.</p>}
+                </div>
+              )}
+            </article>
+          );
+        })
       )}
     </>
   );

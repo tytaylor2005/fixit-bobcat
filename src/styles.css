@@ -1,17 +1,26 @@
 /* FixIt Bobcat — palette + layout. Plain CSS only. */
 :root {
-  --navy: #0a2240;
-  --gold: #c9a227;
-  --offwhite: #f7f5ef;
-  --green: #2e7d32;
-  --amber: #e65100;
+  /* Fresh green palette (sustainability theme) */
+  --forest: #0e3b2c;
+  --forest-2: #175a42;
+  --leaf: #2fb66f;
+  --leaf-2: #1f9a5a;
+  --mint: #e6f6ec;
+  --mint-2: #cfeedb;
+  --paper: #f3faf5;
+  /* Legacy names used throughout the rules: mapped onto the green palette */
+  --navy: var(--forest);
+  --gold: var(--leaf);
+  --offwhite: var(--paper);
+  --green: #1f8a4c;
+  --amber: #d97706;
   --red: #c62828;
-  --ink: #1b1b1b;
-  --muted: #5f6368;
+  --ink: #142019;
+  --muted: #5b6f64;
   --card: #ffffff;
-  --border: #e3e0d6;
-  --radius: 16px;
-  --shadow: 0 2px 10px rgba(10, 34, 64, 0.08);
+  --border: #d9ebe0;
+  --radius: 20px;
+  --shadow: 0 8px 24px rgba(14, 59, 44, 0.08), 0 1px 2px rgba(14, 59, 44, 0.06);
 }
 
 * {
@@ -22,7 +31,9 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--offwhite);
+  background: var(--paper);
+  background-image: radial-gradient(1200px 400px at 50% -120px, var(--mint-2), transparent 70%);
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -55,9 +66,10 @@ textarea {
 
 /* ---------- Header ---------- */
 .header {
-  background: var(--navy);
-  color: var(--gold);
+  background: linear-gradient(160deg, var(--forest) 0%, var(--forest-2) 100%);
+  color: #ffffff;
   padding-top: env(safe-area-inset-top);
+  box-shadow: 0 10px 30px rgba(14, 59, 44, 0.18);
 }
 
 .header-inner {
@@ -87,14 +99,14 @@ textarea {
   margin: 0;
   font-size: 24px;
   font-weight: 800;
-  letter-spacing: 0.2px;
-  color: var(--gold);
+  letter-spacing: -0.2px;
+  color: #ffffff;
 }
 
 .brand-tagline {
   margin: 2px 0 0;
   font-size: 14px;
-  color: #f7f5efcc;
+  color: #bfe9d0;
 }
 
 /* ---------- Tabs ---------- */
@@ -108,17 +120,18 @@ textarea {
   flex: 1;
   min-height: 48px;
   border: none;
-  border-radius: 12px 12px 0 0;
-  background: rgba(255, 255, 255, 0.08);
-  color: #f7f5ef;
+  border-radius: 14px 14px 0 0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e6f6ec;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 .tab-active {
-  background: var(--offwhite);
-  color: var(--navy);
+  background: var(--paper);
+  color: var(--forest);
 }
 
 /* ---------- Content ---------- */
@@ -133,9 +146,10 @@ textarea {
 /* ---------- Cards ---------- */
 .card {
   background: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 16px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -174,9 +188,9 @@ textarea {
 }
 
 .chip-category {
-  border: 1.5px solid var(--navy);
-  color: var(--navy);
-  background: transparent;
+  border: 1.5px solid var(--mint-2);
+  color: var(--forest);
+  background: var(--mint);
 }
 
 .chip-low {
@@ -195,7 +209,7 @@ textarea {
 }
 
 .chip-fixed {
-  background: var(--green);
+  background: linear-gradient(135deg, var(--leaf), var(--leaf-2));
   color: #fff;
 }
 
@@ -221,14 +235,16 @@ textarea {
 }
 
 .btn-primary {
-  background: var(--gold);
-  color: var(--navy);
+  background: linear-gradient(135deg, #3fd185 0%, var(--leaf-2) 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(31, 154, 90, 0.28);
+  transition: transform 0.08s ease, box-shadow 0.15s ease;
 }
 
 .btn-secondary {
-  background: transparent;
-  color: var(--navy);
-  border: 2px solid var(--navy);
+  background: #ffffff;
+  color: var(--forest);
+  border: 2px solid var(--mint-2);
   min-height: 48px;
 }
 
@@ -259,9 +275,10 @@ textarea {
   min-height: 48px;
   padding: 10px 12px;
   border: 1.5px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   background: #fff;
   font-size: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .textarea {
@@ -274,7 +291,7 @@ textarea {
 .textarea:focus,
 .btn:focus-visible,
 .tab:focus-visible {
-  outline: 3px solid var(--gold);
+  outline: 3px solid rgba(47, 182, 111, 0.45);
   outline-offset: 2px;
 }
 
@@ -405,10 +422,10 @@ textarea {
 }
 
 .success {
-  background: rgba(46, 125, 50, 0.1);
-  border: 1.5px solid var(--green);
-  color: var(--green);
-  border-radius: 12px;
+  background: var(--mint);
+  border: 1.5px solid var(--leaf);
+  color: var(--forest);
+  border-radius: 14px;
   padding: 12px 14px;
   font-weight: 700;
 }
@@ -422,9 +439,10 @@ textarea {
 
 .stat {
   background: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 12px 8px;
+  padding: 14px 8px;
   text-align: center;
 }
 
@@ -432,7 +450,7 @@ textarea {
   display: block;
   font-size: 26px;
   font-weight: 800;
-  color: var(--navy);
+  color: var(--forest);
   line-height: 1.1;
 }
 
@@ -453,9 +471,9 @@ textarea {
 .thumb {
   width: 88px;
   height: 88px;
-  border-radius: 12px;
+  border-radius: 14px;
   object-fit: cover;
-  background: #e9e6dc;
+  background: var(--mint);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -493,6 +511,63 @@ textarea {
   grid-column: 1 / -1;
 }
 
+.feed-card {
+  cursor: pointer;
+}
+
+.feed-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.feed-head .feed-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.chevron {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  margin: -12px -12px -12px 0;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chevron:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: -3px;
+}
+
+.chevron-icon {
+  display: block;
+  font-size: 26px;
+  line-height: 1;
+  transform: translateY(-4px);
+  transition: transform 0.15s ease;
+}
+
+.chevron[aria-expanded='true'] .chevron-icon {
+  transform: translateY(2px) rotate(180deg);
+}
+
+.feed-detail {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
 .feed-card .btn-small {
   width: 100%;
 }
@@ -517,7 +592,7 @@ textarea {
 }
 
 .link-light {
-  color: var(--offwhite);
+  color: #e6f6ec;
 }
 
 /* ---------- Admin ---------- */
@@ -530,15 +605,17 @@ textarea {
 }
 
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--offwhite);
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .filters {
   display: flex;
   gap: 6px;
-  background: #e9e6dc;
-  border-radius: 14px;
+  background: var(--mint);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   padding: 4px;
 }
 
@@ -592,4 +669,30 @@ textarea {
 .cost-controls .btn-small {
   width: auto;
   flex: 0 0 auto;
+}
+
+/* ---------- Green polish ---------- */
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 10px rgba(31, 154, 90, 0.25);
+}
+
+.feed-card {
+  transition: transform 0.12s ease, box-shadow 0.15s ease;
+}
+
+.feed-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(14, 59, 44, 0.12);
+}
+
+.card-title {
+  color: var(--forest);
+}
+
+.feed-title,
+.label,
+.filter,
+.link {
+  color: var(--forest);
 }
