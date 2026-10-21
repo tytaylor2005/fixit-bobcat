@@ -14,7 +14,7 @@ const CATEGORY_EMOJI: Record<Category, string> = {
   OTHER: '❓',
 };
 
-function timeAgo(iso: string): string {
+export function timeAgo(iso: string): string {
   const diff = Math.max(0, Date.now() - new Date(iso).getTime());
   const m = Math.floor(diff / 60_000);
   if (m < 1) return 'just now';
@@ -25,11 +25,44 @@ function timeAgo(iso: string): string {
   return `${d} day${d === 1 ? '' : 's'} ago`;
 }
 
-function severityClass(s: Severity) {
+export function severityClass(s: Severity) {
   return s === 'HIGH' ? 'chip chip-high' : s === 'MEDIUM' ? 'chip chip-medium' : 'chip chip-low';
 }
 
-function Thumb({ photoKey, category }: { photoKey: string; category: Category }) {
+/** Map a raw Report record from the API into the shape the UI renders. */
+export function toItem(r: {
+  id: string;
+  photoKey: string;
+  building: string;
+  category?: string | null;
+  title: string;
+  description?: string | null;
+  impact?: string | null;
+  impactScore?: number | null;
+  severity?: string | null;
+  action?: string | null;
+  status?: string | null;
+  estimatedCost?: number | null;
+  createdAt: string;
+}): ReportItem {
+  return {
+    id: r.id,
+    photoKey: r.photoKey,
+    building: r.building,
+    category: (r.category ?? 'OTHER') as Category,
+    title: r.title,
+    description: r.description ?? '',
+    impact: r.impact ?? 'Unknown',
+    impactScore: r.impactScore ?? 0,
+    severity: (r.severity ?? 'MEDIUM') as Severity,
+    action: r.action ?? '',
+    status: r.status === 'FIXED' ? 'FIXED' : 'OPEN',
+    estimatedCost: r.estimatedCost ?? null,
+    createdAt: r.createdAt,
+  };
+}
+
+export function Thumb({ photoKey, category }: { photoKey: string; category: Category }) {
   const [url, setUrl] = useState<string>('');
   useEffect(() => {
     let alive = true;
@@ -55,27 +88,13 @@ function Thumb({ photoKey, category }: { photoKey: string; category: Category })
 export default function Feed() {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId] = useState<string>('');
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
         const { data } = await getClient().models.Report.list({ limit: 200 });
-        const items: ReportItem[] = (data ?? []).map((r) => ({
-          id: r.id,
-          photoKey: r.photoKey,
-          building: r.building,
-          category: (r.category ?? 'OTHER') as Category,
-          title: r.title,
-          description: r.description ?? '',
-          impact: r.impact ?? 'Unknown',
-          impactScore: r.impactScore ?? 0,
-          severity: (r.severity ?? 'MEDIUM') as Severity,
-          action: r.action ?? '',
-          status: r.status === 'FIXED' ? 'FIXED' : 'OPEN',
-          createdAt: r.createdAt,
-        }));
+        const items = (data ?? []).map(toItem);
         items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
         if (!alive) return;
         setReports(items.length === 0 && DEMO ? SEED_REPORTS : items);
@@ -90,21 +109,6 @@ export default function Feed() {
       alive = false;
     };
   }, []);
-
-  const markFixed = async (id: string) => {
-    setBusyId(id);
-    try {
-      if (!id.startsWith('seed-')) {
-        const { errors } = await getClient().models.Report.update({ id, status: 'FIXED' });
-        if (errors?.length) throw new Error(errors[0].message);
-      }
-      setReports((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'FIXED' } : r)));
-    } catch (err) {
-      console.error('mark fixed failed', err);
-    } finally {
-      setBusyId('');
-    }
-  };
 
   const open = reports.filter((r) => r.status === 'OPEN').length;
   const fixed = reports.length - open;
@@ -157,18 +161,6 @@ export default function Feed() {
               </div>
               <p className="feed-impact">📊 {r.impact}</p>
             </div>
-            {r.status === 'OPEN' && (
-              <div className="feed-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-small"
-                  onClick={() => markFixed(r.id)}
-                  disabled={busyId === r.id}
-                >
-                  {busyId === r.id ? 'Saving…' : '✓ Mark fixed'}
-                </button>
-              </div>
-            )}
           </article>
         ))
       )}

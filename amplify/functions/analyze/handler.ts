@@ -23,6 +23,7 @@ type Analysis = {
   impactScore: number;
   severity: string;
   action: string;
+  estimatedCost: number | null;
 };
 
 const FALLBACK: Analysis = {
@@ -34,6 +35,7 @@ const FALLBACK: Analysis = {
   impactScore: 3,
   severity: 'MEDIUM',
   action: 'Send someone to check.',
+  estimatedCost: null,
 };
 
 const buildPrompt = (building: string) => `You are FixIt Bobcat, a campus sustainability assistant for Georgia College & State University.
@@ -45,7 +47,8 @@ Identify the waste or maintenance problem and respond with ONLY a JSON object, n
  "impact":"a concrete estimate with a unit, e.g. '~1,500 gallons/week' or '~3 kWh/day'. If unsure, give a rough range.",
  "impactScore":1-10 integer (10 = worst),
  "severity":"exactly one of: LOW, MEDIUM, HIGH",
- "action":"one sentence telling facilities what to do"}
+ "action":"one sentence telling facilities what to do",
+ "estimatedCost":rough cost in US dollars for facilities to fix this, as a plain number with no $ sign (0 if nothing to fix)}
 If the photo shows nothing wrong, use category OTHER, severity LOW, impactScore 1, and say so kindly.`;
 
 const imageFormatFor = (key: string): ImageFormat => {
@@ -116,6 +119,7 @@ const normalize = (raw: Record<string, unknown>): Analysis => {
     pickEnum(raw.category, CATEGORIES) ?? inferCategory(`${title} ${description} ${action}`);
   const severity = pickEnum(raw.severity, SEVERITIES) ?? 'MEDIUM';
   const score = Math.round(Number(raw.impactScore));
+  const cost = Number(String(raw.estimatedCost ?? '').replace(/[^0-9.]/g, ''));
   return {
     category,
     title,
@@ -124,6 +128,7 @@ const normalize = (raw: Record<string, unknown>): Analysis => {
     impactScore: Number.isFinite(score) ? Math.min(10, Math.max(1, score)) : FALLBACK.impactScore,
     severity,
     action,
+    estimatedCost: Number.isFinite(cost) && cost >= 0 ? Math.round(cost) : null,
   };
 };
 

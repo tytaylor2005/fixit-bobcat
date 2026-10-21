@@ -1,11 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Report from './Report';
 import Feed from './Feed';
+import Admin from './Admin';
 
 export type Tab = 'report' | 'feed';
 
+/** Tiny hash router: "/" is the student app, "/#admin" is the staff side. */
+function useHash() {
+  const [hash, setHash] = useState(window.location.hash);
+  useEffect(() => {
+    const onChange = () => setHash(window.location.hash);
+    window.addEventListener('hashchange', onChange);
+    return () => window.removeEventListener('hashchange', onChange);
+  }, []);
+  return hash;
+}
+
 export default function App() {
   const [tab, setTab] = useState<Tab>('report');
+  const hash = useHash();
+
+  if (hash === '#admin') return <Admin />;
 
   return (
     <div className="app">
@@ -42,6 +57,10 @@ export default function App() {
       <main className="container content">
         {tab === 'report' ? <Report onViewFeed={() => setTab('feed')} /> : <Feed />}
       </main>
+
+      <footer className="container footer">
+        <a className="link" href="#admin">Staff sign in</a>
+      </footer>
     </div>
   );
 }

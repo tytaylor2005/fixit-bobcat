@@ -13,6 +13,7 @@ interface Analysis {
   impactScore: number;
   severity: Severity;
   action: string;
+  estimatedCost: number | null;
 }
 
 interface ReportProps {
@@ -21,6 +22,16 @@ interface ReportProps {
 
 const ANALYZE_TIMEOUT_MS = 25_000;
 const MAX_EDGE = 1600;
+
+const BUILDING_KEY = 'fixit.building';
+const rememberedBuilding = (): string => {
+  try {
+    const saved = localStorage.getItem(BUILDING_KEY);
+    return saved && (BUILDINGS as readonly string[]).includes(saved) ? saved : BUILDINGS[0];
+  } catch {
+    return BUILDINGS[0];
+  }
+};
 
 const CATEGORY_SET = new Set<string>(['WATER', 'ENERGY', 'WASTE', 'DAMAGE', 'OTHER']);
 const SEVERITY_SET = new Set<string>(['LOW', 'MEDIUM', 'HIGH']);
@@ -61,7 +72,7 @@ export default function Report({ onViewFeed }: ReportProps) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
-  const [building, setBuilding] = useState<string>(BUILDINGS[0]);
+  const [building, setBuilding] = useState<string>(rememberedBuilding);
   const [photoKey, setPhotoKey] = useState<string>('');
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [title, setTitle] = useState('');
@@ -125,6 +136,7 @@ export default function Report({ onViewFeed }: ReportProps) {
         impactScore: Math.min(10, Math.max(1, Math.round(Number(data.impactScore ?? 3)))),
         severity: (SEVERITY_SET.has(severity) ? severity : 'MEDIUM') as Severity,
         action: data.action ?? '',
+        estimatedCost: typeof data.estimatedCost === 'number' ? data.estimatedCost : null,
       };
       setAnalysis(result);
       setTitle(result.title);
@@ -157,6 +169,7 @@ export default function Report({ onViewFeed }: ReportProps) {
         severity: analysis.severity,
         action: analysis.action,
         status: 'OPEN',
+        estimatedCost: analysis.estimatedCost,
       });
       if (errors?.length) throw new Error(errors[0].message);
       setPhase('done');
@@ -297,7 +310,14 @@ export default function Report({ onViewFeed }: ReportProps) {
               id="building"
               className="select"
               value={building}
-              onChange={(e) => setBuilding(e.target.value)}
+              onChange={(e) => {
+                setBuilding(e.target.value);
+                try {
+                  localStorage.setItem(BUILDING_KEY, e.target.value);
+                } catch {
+                  /* private mode: ignore */
+                }
+              }}
             >
               {BUILDINGS.map((b) => (
                 <option key={b} value={b}>{b}</option>

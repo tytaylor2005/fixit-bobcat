@@ -35,3 +35,9 @@ Target times are from the start of the build clock. Driver: check each box only 
 - Add auth, maps, notifications, comments, pagination, multi-photo, or any feature not in requirements.md.
 - Refactor working code.
 - Switch libraries or frameworks mid-build.
+
+## Phase 6 — Post-spec additions (team request, after the 90-minute plan)
+
+- [x] 15. Backend: `estimatedCost` on Report + AnalysisResult; public key = create/read only, authenticated = read/update/delete; authenticated storage read; Lambda prompt asks for a USD repair estimate.
+- [x] 16. Frontend: hash route `#admin` → `Admin.tsx` (Cognito sign-in, filters, cost tiles, expected-cost editor, Mark fixed / Reopen). Public Feed becomes view-only. Student page remembers the building and links to staff sign-in.
+- [x] 17. Create a staff demo user in the Cognito pool (login kept in git-ignored `STAFF-LOGIN.local.md`), verify student + staff flows in the browser, update README.

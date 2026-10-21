@@ -47,6 +47,12 @@ npm run dev -- --host   # to open it from a phone on the same Wi-Fi
 - The Vite 8 template omits `"strict": true`; Amplify's data client types break without it. Already fixed in `tsconfig.app.json`.
 - CDK had to be bootstrapped in us-east-2 once (`npx aws-cdk bootstrap aws://509425091556/us-east-2`). Done.
 
+## Staff console (private)
+
+Open `/#admin` (for example http://localhost:5173/#admin). Staff sign in with a Cognito email + password; students never see a login. Staff can filter Open / Fixed / All, set the **expected cost** of each fix (pre-filled by the AI), and mark issues fixed or reopen them. The public API key can only create and read reports, so nothing on the student side can change a record.
+
+The demo staff login is in `STAFF-LOGIN.local.md` on the driver's laptop (git-ignored). That file also has the two CLI commands to add more staff accounts.
+
 ## Demo fallback
 
 `VITE_DEMO=true npm run dev` shows the seed reports in `src/seed.ts` on the Feed if the backend is down.

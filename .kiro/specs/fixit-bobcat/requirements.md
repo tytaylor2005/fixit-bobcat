@@ -57,3 +57,19 @@ Acceptance criteria:
 
 ## GCSU buildings (fixed list for the dropdown)
 Atkinson Hall, Arts & Sciences, Beeson Hall, Bell Hall, Centennial Center, Foundation Hall, Herty Hall, Ina Dillard Russell Library, Kilpatrick Hall, Magnolia Ballroom, Napier Hall, Parkhurst Hall, Sanford Hall, Terrell Hall, The Village, Wells Hall, Wellness & Recreation Center, Other
+
+## Post-spec additions (requested by the team after Task 13, Oct 21 2026)
+
+### US-5: Staff console (private)
+As facilities staff, I want a private page to triage reports, so students can report without accounts while only staff can change records.
+
+Acceptance criteria:
+1. `/#admin` shows an email + password sign-in (Cognito user pool from `amplify/auth`). No sign-up; staff accounts are created by an admin with the AWS CLI.
+2. WHEN signed in THEN I see all reports newest first with Open / Fixed / All filters and tiles for Open count, expected cost of open issues, and spent on fixed issues.
+3. Each report shows the photo, description, impact, suggested action, an editable **Expected cost ($)** (pre-filled by the AI's estimate), and **Mark fixed** / **Reopen**.
+4. Only signed-in staff can update or delete reports; the public API key can only create and read. The public Feed no longer has "Mark fixed".
+
+### US-6: Student page stays effortless
+1. Root URL is the student page: snap → "Bobcat is looking…" → review → submit, three taps.
+2. The building picker remembers the last choice on this device.
+3. A small "Staff sign in" link in the footer leads to the staff console.

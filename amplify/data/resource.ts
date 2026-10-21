@@ -14,8 +14,14 @@ const schema = a.schema({
       severity: a.enum(['LOW', 'MEDIUM', 'HIGH']),
       action: a.string(),
       status: a.enum(['OPEN', 'FIXED']),
+      estimatedCost: a.float(), // expected repair cost in USD (AI-suggested, staff-editable)
     })
-    .authorization((allow) => [allow.publicApiKey()]),
+    .authorization((allow) => [
+      // Students (no account): report and browse.
+      allow.publicApiKey().to(['create', 'read']),
+      // Signed-in staff: mark fixed, set expected cost, clean up.
+      allow.authenticated().to(['read', 'update', 'delete']),
+    ]),
 
   AnalysisResult: a.customType({
     category: a.string(),
@@ -25,6 +31,7 @@ const schema = a.schema({
     impactScore: a.integer(),
     severity: a.string(),
     action: a.string(),
+    estimatedCost: a.float(),
   }),
 
   analyze: a

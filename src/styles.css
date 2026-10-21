@@ -443,3 +443,100 @@ textarea {
 .feed-card .btn-small {
   width: 100%;
 }
+
+/* ---------- Footer / links ---------- */
+.footer {
+  padding-top: 8px;
+  padding-bottom: 32px;
+  text-align: center;
+}
+
+.link {
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.link-light {
+  color: var(--offwhite);
+}
+
+/* ---------- Admin ---------- */
+.admin-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 16px;
+}
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--offwhite);
+}
+
+.filters {
+  display: flex;
+  gap: 6px;
+  background: #e9e6dc;
+  border-radius: 14px;
+  padding: 4px;
+}
+
+.filter {
+  flex: 1;
+  min-height: 48px;
+  border: none;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filter-active {
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.admin-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.card-desc {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.cost-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cost-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.cost-controls .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.cost-controls .btn-small {
+  width: auto;
+  flex: 0 0 auto;
+}

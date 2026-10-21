@@ -1,10 +1,19 @@
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../amplify/data/resource';
 
-let client: ReturnType<typeof generateClient<Schema>> | null = null;
+type Client = ReturnType<typeof generateClient<Schema>>;
 
-/** Lazily created so it is built after Amplify.configure() has run. */
+let publicClient: Client | null = null;
+let staffClient: Client | null = null;
+
+/** Students: public API key. Lazily created so it is built after Amplify.configure(). */
 export const getClient = () => {
-  if (!client) client = generateClient<Schema>();
-  return client;
+  if (!publicClient) publicClient = generateClient<Schema>();
+  return publicClient;
+};
+
+/** Staff: signed-in Cognito user. Can update / delete reports. */
+export const getStaffClient = () => {
+  if (!staffClient) staffClient = generateClient<Schema>({ authMode: 'userPool' });
+  return staffClient;
 };
